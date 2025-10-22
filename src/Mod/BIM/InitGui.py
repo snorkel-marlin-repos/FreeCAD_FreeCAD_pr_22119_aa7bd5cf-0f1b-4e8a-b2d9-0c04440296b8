@@ -572,12 +572,9 @@ class BIMWorkbench(Workbench):
                     {"insert": "BIM_Help", "menuItem": "Std_ReportBug", "after": ""},
                     {"insert": "BIM_Welcome", "menuItem": "Std_ReportBug", "after": ""},
                 ]
-        reload = hasattr(Gui, "BIM_WBManipulator")  # BIM WB has previously been loaded.
-        if not getattr(Gui, "BIM_WBManipulator", None):
+        if not hasattr(Gui, "BIM_WBManipulator"):
             Gui.BIM_WBManipulator = BIM_WBManipulator()
         Gui.addWorkbenchManipulator(Gui.BIM_WBManipulator)
-        if reload:
-            Gui.activeWorkbench().reloadActive()
 
         Log("BIM workbench activated\n")
 
@@ -628,7 +625,7 @@ class BIMWorkbench(Workbench):
         # remove manipulator
         if hasattr(Gui, "BIM_WBManipulator"):
             Gui.removeWorkbenchManipulator(Gui.BIM_WBManipulator)
-            Gui.BIM_WBManipulator = None
+            del Gui.BIM_WBManipulator
             Gui.activeWorkbench().reloadActive()
 
         Log("BIM workbench deactivated\n")

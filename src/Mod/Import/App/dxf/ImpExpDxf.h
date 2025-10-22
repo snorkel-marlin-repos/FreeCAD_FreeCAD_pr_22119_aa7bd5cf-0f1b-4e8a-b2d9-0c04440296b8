@@ -50,8 +50,6 @@ public:
         Py_XDECREF(DraftModule);
     }
 
-    Py::Object getStatsAsPyObject();
-
     bool ReadEntitiesSection() override;
 
     // CDxfRead's virtual functions
@@ -110,11 +108,6 @@ public:
     void setOptions();
 
 private:
-    bool shouldSkipEntity() const
-    {
-        // This entity is in paper space, and the user setting says to ignore it.
-        return !m_importPaperSpaceEntities && m_entityAttributes.m_paperSpace;
-    }
     static gp_Pnt makePoint(const Base::Vector3d& point3d)
     {
         return {point3d.x, point3d.y, point3d.z};
@@ -206,11 +199,6 @@ private:
     std::string m_optionSource;
 
 protected:
-    friend class DrawingEntityCollector;
-    void IncrementCreatedObjectCount()
-    {
-        m_stats.totalEntitiesCreated++;
-    }
     virtual void ApplyGuiStyles(Part::Feature* /*object*/) const
     {}
     virtual void ApplyGuiStyles(App::FeaturePython* /*object*/) const

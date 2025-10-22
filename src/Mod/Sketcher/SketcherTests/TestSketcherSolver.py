@@ -464,7 +464,8 @@ class TestSketcherSolver(unittest.TestCase):
         sketch.addConstraint(
             [Sketcher.Constraint("Block", c_idx), Sketcher.Constraint("Block", l_idx)]
         )
-        expected_distance = radius / 2  # note that we don't set this in the constraint below!
+        # use a negative distance to tell "line is within the circle"
+        expected_distance = -radius / 2  # note that we don't set this in the constraint below!
         # TODO: addConstraint(constraint) triggers a solve (for godd reasons) however, this way
         # one cannot add non-driving constraints. In contrast, addConstraint(list(constraint))
         # does not solve automatically, thus we use this "overload".

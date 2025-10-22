@@ -118,41 +118,41 @@ int EditDatumDialog::exec(bool atCursor)
         ui_ins_datum->labelEdit->setEntryName(QByteArray("DatumValue"));
         if (Constr->Type == Sketcher::Angle) {
             datum = Base::toDegrees<double>(datum);
-            dlg.setWindowTitle(tr("Insert Angle"));
+            dlg.setWindowTitle(tr("Insert angle"));
             init_val.setUnit(Base::Unit::Angle);
             ui_ins_datum->label->setText(tr("Angle:"));
             ui_ins_datum->labelEdit->setParamGrpPath(
                 QByteArray("User parameter:BaseApp/History/SketcherAngle"));
         }
         else if (Constr->Type == Sketcher::Radius) {
-            dlg.setWindowTitle(tr("Insert Radius"));
+            dlg.setWindowTitle(tr("Insert radius"));
             init_val.setUnit(Base::Unit::Length);
             ui_ins_datum->label->setText(tr("Radius:"));
             ui_ins_datum->labelEdit->setParamGrpPath(
                 QByteArray("User parameter:BaseApp/History/SketcherLength"));
         }
         else if (Constr->Type == Sketcher::Diameter) {
-            dlg.setWindowTitle(tr("Insert Diameter"));
+            dlg.setWindowTitle(tr("Insert diameter"));
             init_val.setUnit(Base::Unit::Length);
             ui_ins_datum->label->setText(tr("Diameter:"));
             ui_ins_datum->labelEdit->setParamGrpPath(
                 QByteArray("User parameter:BaseApp/History/SketcherLength"));
         }
         else if (Constr->Type == Sketcher::Weight) {
-            dlg.setWindowTitle(tr("Insert Weight"));
+            dlg.setWindowTitle(tr("Insert weight"));
             ui_ins_datum->label->setText(tr("Weight:"));
             ui_ins_datum->labelEdit->setParamGrpPath(
                 QByteArray("User parameter:BaseApp/History/SketcherWeight"));
         }
         else if (Constr->Type == Sketcher::SnellsLaw) {
-            dlg.setWindowTitle(tr("Refractive Index Ratio", "Constraint_SnellsLaw"));
+            dlg.setWindowTitle(tr("Refractive index ratio", "Constraint_SnellsLaw"));
             ui_ins_datum->label->setText(tr("Ratio n2/n1:", "Constraint_SnellsLaw"));
             ui_ins_datum->labelEdit->setParamGrpPath(
                 QByteArray("User parameter:BaseApp/History/SketcherRefrIndexRatio"));
             ui_ins_datum->labelEdit->setSingleStep(0.05);
         }
         else {
-            dlg.setWindowTitle(tr("Insert Length"));
+            dlg.setWindowTitle(tr("Insert length"));
             init_val.setUnit(Base::Unit::Length);
             ui_ins_datum->label->setText(tr("Length:"));
             ui_ins_datum->labelEdit->setParamGrpPath(
@@ -412,22 +412,12 @@ void EditDatumDialog::performAutoScale(double newDatum)
         && sketch->getExternalGeometryCount() <= 2 && sketch->hasSingleScaleDefiningConstraint()) {
         try {
             double oldDatum = sketch->getDatum(ConstrNbr);
-            double scaleFactor = newDatum / oldDatum;
+            double scale_factor = newDatum / oldDatum;
             float initLabelDistance = sketch->Constraints[ConstrNbr]->LabelDistance;
             float initLabelPosition = sketch->Constraints[ConstrNbr]->LabelPosition;
-            centerScale(sketch, scaleFactor);
-            sketch->setLabelDistance(ConstrNbr, initLabelDistance * scaleFactor);
-
-            // Label position or radii and diameters represent an angle, so
-            // they should not be scaled
-            Sketcher::ConstraintType type = sketch->Constraints[ConstrNbr]->Type;
-            if (type == Sketcher::ConstraintType::Radius
-                || type == Sketcher::ConstraintType::Diameter) {
-                sketch->setLabelPosition(ConstrNbr, initLabelPosition);
-            }
-            else {
-                sketch->setLabelPosition(ConstrNbr, initLabelPosition * scaleFactor);
-            }
+            centerScale(sketch, scale_factor);
+            sketch->setLabelDistance(ConstrNbr, initLabelDistance * scale_factor);
+            sketch->setLabelPosition(ConstrNbr, initLabelPosition * scale_factor);
         }
         catch (const Base::Exception& e) {
             Base::Console().error("Exception performing autoscale: %s\n", e.what());

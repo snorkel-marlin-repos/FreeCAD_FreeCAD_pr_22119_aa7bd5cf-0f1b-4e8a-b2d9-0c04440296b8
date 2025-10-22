@@ -11,13 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Task Heat Flux Load</string>
+   <string>Task Fem Heat flux Load</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QLabel" name="lbl_references">
      <property name="text">
-      <string>Click Add or Remove and select faces</string>
+      <string>Click Add or Remove and select face(s)</string>
      </property>
     </widget>
    </item>
@@ -67,7 +67,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="lbl_constr_type">
          <property name="text">
-          <string>Constraint type</string>
+          <string>Constraint Type</string>
          </property>
         </widget>
        </item>
@@ -93,7 +93,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="lbl_heat_flux">
            <property name="text">
-            <string>Surface heat flux</string>
+            <string>Surface Heat Flux</string>
            </property>
           </widget>
          </item>
@@ -130,7 +130,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="lbl_filmcoef">
            <property name="text">
-            <string>Film coefficient</string>
+            <string>Film Coefficient</string>
            </property>
           </widget>
          </item>
@@ -153,7 +153,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="lbl_ambienttemp_conv">
            <property name="text">
-            <string>Ambient temperature</string>
+            <string>Ambient Temperature</string>
            </property>
           </widget>
          </item>
@@ -215,7 +215,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="lbl_ambienttemp_rad">
            <property name="text">
-            <string>Ambient temperature</string>
+            <string>Ambient Temperature</string>
            </property>
           </widget>
          </item>

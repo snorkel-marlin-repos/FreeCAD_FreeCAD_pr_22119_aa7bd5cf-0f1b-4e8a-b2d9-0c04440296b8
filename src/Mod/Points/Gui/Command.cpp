@@ -66,10 +66,10 @@ CmdPointsImport::CmdPointsImport()
 {
     sAppModule = "Points";
     sGroup = QT_TR_NOOP("Points");
-    sMenuText = QT_TR_NOOP("Import Points…");
+    sMenuText = QT_TR_NOOP("Import points...");
     sToolTipText = QT_TR_NOOP("Imports a point cloud");
     sWhatsThis = "Points_Import";
-    sStatusTip = sToolTipText;
+    sStatusTip = QT_TR_NOOP("Imports a point cloud");
     sPixmap = "Points_Import_Point_cloud";
 }
 
@@ -116,8 +116,8 @@ void CmdPointsImport::activated(int iMsg)
                 msgBox.setIcon(QMessageBox::Question);
                 msgBox.setWindowTitle(QObject::tr("Points not at Origin"));
                 msgBox.setText(QObject::tr(
-                    "The bounding box of the imported points does not contain the origin. "
-                    "Translate it to the origin?"));
+                    "The Bounding Box of the imported points does not contain the origin.  "
+                    "Do you want to translate it to the origin?"));
                 msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
                 msgBox.setDefaultButton(QMessageBox::Yes);
                 auto ret = msgBox.exec();
@@ -151,7 +151,7 @@ CmdPointsExport::CmdPointsExport()
 {
     sAppModule = "Points";
     sGroup = QT_TR_NOOP("Points");
-    sMenuText = QT_TR_NOOP("Export Points…");
+    sMenuText = QT_TR_NOOP("Export points...");
     sToolTipText = QT_TR_NOOP("Exports a point cloud");
     sWhatsThis = "Points_Export";
     sStatusTip = QT_TR_NOOP("Exports a point cloud");
@@ -199,9 +199,9 @@ CmdPointsTransform::CmdPointsTransform()
     sAppModule = "Points";
     sGroup = QT_TR_NOOP("Points");
     sMenuText = QT_TR_NOOP("Transform Points");
-    sToolTipText = QT_TR_NOOP("Performs tests to transform a point cloud");
+    sToolTipText = QT_TR_NOOP("Test to transform a point cloud");
     sWhatsThis = "Points_Transform";
-    sStatusTip = sToolTipText;
+    sStatusTip = QT_TR_NOOP("Test to transform a point cloud");
     sPixmap = "Test1";
 }
 
@@ -237,10 +237,10 @@ CmdPointsConvert::CmdPointsConvert()
 {
     sAppModule = "Points";
     sGroup = QT_TR_NOOP("Points");
-    sMenuText = QT_TR_NOOP("Convert to Points…");
-    sToolTipText = QT_TR_NOOP("Converts to points");
+    sMenuText = QT_TR_NOOP("Convert to points...");
+    sToolTipText = QT_TR_NOOP("Convert to points");
     sWhatsThis = "Points_Convert";
-    sStatusTip = sToolTipText;
+    sStatusTip = QT_TR_NOOP("Convert to points");
     sPixmap = "Points_Convert";
 }
 
@@ -325,10 +325,10 @@ CmdPointsPolyCut::CmdPointsPolyCut()
 {
     sAppModule = "Points";
     sGroup = QT_TR_NOOP("Points");
-    sMenuText = QT_TR_NOOP("Cut Point Cloud");
-    sToolTipText = QT_TR_NOOP("Cuts a point cloud with a selected polygon");
+    sMenuText = QT_TR_NOOP("Cut point cloud");
+    sToolTipText = QT_TR_NOOP("Cuts a point cloud with a picked polygon");
     sWhatsThis = "Points_PolyCut";
-    sStatusTip = sToolTipText;
+    sStatusTip = QT_TR_NOOP("Cuts a point cloud with a picked polygon");
     sPixmap = "PolygonPick";
 }
 
@@ -373,10 +373,10 @@ CmdPointsMerge::CmdPointsMerge()
 {
     sAppModule = "Points";
     sGroup = QT_TR_NOOP("Points");
-    sMenuText = QT_TR_NOOP("Merge Point Clouds");
-    sToolTipText = QT_TR_NOOP("Merges several point clouds into one");
+    sMenuText = QT_TR_NOOP("Merge point clouds");
+    sToolTipText = QT_TR_NOOP("Merge several point clouds into one");
     sWhatsThis = "Points_Merge";
-    sStatusTip = sToolTipText;
+    sStatusTip = QT_TR_NOOP("Merge several point clouds into one");
     sPixmap = "Points_Merge";
 }
 
@@ -435,10 +435,10 @@ CmdPointsStructure::CmdPointsStructure()
 {
     sAppModule = "Points";
     sGroup = QT_TR_NOOP("Points");
-    sMenuText = QT_TR_NOOP("Structured Point Cloud");
-    sToolTipText = QT_TR_NOOP("Converts points to a structured point cloud");
+    sMenuText = QT_TR_NOOP("Structured point cloud");
+    sToolTipText = QT_TR_NOOP("Convert points to structured point cloud");
     sWhatsThis = "Points_Structure";
-    sStatusTip = sToolTipText;
+    sStatusTip = QT_TR_NOOP("Convert points to structured point cloud");
     sPixmap = "Points_Structure";
 }
 

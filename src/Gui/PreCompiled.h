@@ -69,10 +69,8 @@
 #include <list>
 #include <map>
 #include <numbers>
-#include <optional>
 #include <queue>
 #include <random>
-#include <ranges>
 #include <set>
 #include <sstream>
 #include <stack>

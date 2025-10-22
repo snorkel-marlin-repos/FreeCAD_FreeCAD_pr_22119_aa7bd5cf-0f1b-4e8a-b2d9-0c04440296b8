@@ -548,7 +548,7 @@ public:
    * @return `true` if the property was renamed; `false` otherwise.
    * @throw Base::NameError If the new name is invalid or already exists.
    */
-  virtual bool renameDynamicProperty(Property *prop, const char *name) {
+  bool renameDynamicProperty(Property *prop, const char *name) {
       return dynamicProps.renameDynamicProperty(prop,name);
   }
 

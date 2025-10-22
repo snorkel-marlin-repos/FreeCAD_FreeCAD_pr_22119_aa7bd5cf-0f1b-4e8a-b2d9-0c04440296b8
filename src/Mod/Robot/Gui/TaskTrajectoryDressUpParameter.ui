@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>Speed &amp; acceleration</string>
+      <string>Speed &amp; Acceleration:</string>
      </property>
     </widget>
    </item>
@@ -26,7 +26,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Speed</string>
+        <string>Speed:</string>
        </property>
       </widget>
      </item>
@@ -63,7 +63,7 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Acceleration</string>
+        <string>Accel:</string>
        </property>
       </widget>
      </item>
@@ -99,8 +99,7 @@
     <widget class="QComboBox" name="comboBoxCont">
      <item>
       <property name="text">
-       <string>Do not change continuous mode</string>
-
+       <string>Don't change Cont</string>
       </property>
      </item>
      <item>
@@ -125,7 +124,7 @@
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Position and orientation</string>
+      <string>Position and Orientation:</string>
      </property>
     </widget>
    </item>
@@ -147,7 +146,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string notr="true">…</string>
+        <string notr="true">...</string>
        </property>
       </widget>
      </item>
@@ -157,22 +156,22 @@
     <widget class="QComboBox" name="comboBoxOrientation">
      <item>
       <property name="text">
-       <string>Don not change position &amp; orientation</string>
+       <string>Don't change Position &amp; Orientation</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Use orientation</string>
+       <string>Use Orientation</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Add position</string>
+       <string>Add Position</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Add orientation</string>
+       <string>Add Orientation</string>
       </property>
      </item>
     </widget>

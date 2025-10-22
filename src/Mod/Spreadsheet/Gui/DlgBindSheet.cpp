@@ -223,7 +223,7 @@ void DlgBindSheet::accept()
                                                     tr("Bind cells"),
                                                     tr("Source and target cell count mismatch. "
                                                        "Partial binding may still work.\n\n"
-                                                       "Continue?"),
+                                                       "Do you want to continue?"),
                                                     QMessageBox::Yes | QMessageBox::No);
                     if (res == QMessageBox::No) {
                         return;

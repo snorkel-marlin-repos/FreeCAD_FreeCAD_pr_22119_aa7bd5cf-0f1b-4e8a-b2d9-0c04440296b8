@@ -474,18 +474,16 @@ Part::TopoShape SketchObject::buildInternals(const Part::TopoShape &edges) const
             joiner.getResultWires(result, "SKF");
             result = result.makeElementFace(result.getSubTopoShapes(TopAbs_WIRE),
                     /*op*/"",
-                    /*maker*/"Part::FaceMakerRing",
+                    /*maker*/"Part::FaceMakerBullseye",
                     /*pln*/nullptr
             );
         }
         Part::TopoShape openWires(getID(), getDocument()->getStringHasher());
         joiner.getOpenWires(openWires, "SKF");
-        if (openWires.isNull()) {
+        if (openWires.isNull())
             return result;  // No open wires, return either face or empty toposhape
-        }
-        if (result.isNull()) {
+        if (result.isNull())
             return openWires;   // No face, but we have open wires to return as a shape
-        }
         return result.makeElementCompound({result, openWires}); // Compound and return both
     } catch (Base::Exception &e) {
         FC_WARN("Failed to make face for sketch: " << e.what());
@@ -615,6 +613,13 @@ int SketchObject::solve(bool updateGeoAfterSolving /*=true*/)
                 Geometry.moveValues(std::move(tmp));
             }
         }
+    }
+    else if (err < 0) {
+        // if solver failed, invalid constraints were likely added before solving
+        // (see solve in addConstraint), so solver information is definitely invalid.
+        //
+        // Update: ViewProviderSketch shall now rely on the signalSolverUpdate below for update
+        // this->Constraints.touch();
     }
 
     signalSolverUpdate();
@@ -1784,9 +1789,8 @@ int SketchObject::delGeometry(int GeoId, bool deleteinternalgeo)
     Base::StateLocker lock(managedoperation, true);
 
     const std::vector<Part::Geometry*>& vals = getInternalGeometry();
-    if (GeoId >= int(vals.size())) {
+    if (GeoId < 0 || GeoId >= int(vals.size()))
         return -1;
-    }
 
     if (deleteinternalgeo && hasInternalGeometry(getGeometry(GeoId))) {
         // Only for supported types
@@ -3821,7 +3825,7 @@ int SketchObject::join(int geoId1, Sketcher::PointPos posId1, int geoId2, Sketch
 
     if (Sketcher::PointPos::start != posId1 && Sketcher::PointPos::end != posId1
         && Sketcher::PointPos::start != posId2 && Sketcher::PointPos::end != posId2) {
-        THROWM(ValueError, "Invalid positions: points must be start or end points of a curve.");
+        THROWM(ValueError, "Invalid position(s): points must be start or end points of a curve.");
         return -1;
     }
 
@@ -7569,9 +7573,8 @@ const Part::Geometry* SketchObject::_getGeometry(int GeoId) const
         if (GeoId < int(geomlist.size()))
             return geomlist[GeoId];
     }
-    else if (-GeoId-1 < ExternalGeo.getSize()) {
+    else if (GeoId < 0 && -GeoId-1 < ExternalGeo.getSize())
         return ExternalGeo[-GeoId-1];
-    }
 
     return nullptr;
 }
@@ -9445,16 +9448,16 @@ void SketchObject::getConstraintIndices(int GeoId, std::vector<int>& constraintL
 void SketchObject::appendConflictMsg(const std::vector<int>& conflicting, std::string& msg)
 {
     appendConstraintsMsg(conflicting,
-                         "Remove the following conflicting constraint:",
-                         "Remove at least one of the following conflicting constraints:",
+                         "Please remove the following conflicting constraint:\n",
+                         "Please remove at least one of the following conflicting constraints:\n",
                          msg);
 }
 
 void SketchObject::appendRedundantMsg(const std::vector<int>& redundant, std::string& msg)
 {
     appendConstraintsMsg(redundant,
-                         "Remove the following redundant constraint:",
-                         "Remove the following redundant constraints:",
+                         "Please remove the following redundant constraint:",
+                         "Please remove the following redundant constraints:",
                          msg);
 }
 
@@ -9462,8 +9465,8 @@ void SketchObject::appendMalformedConstraintsMsg(const std::vector<int>& malform
                                                  std::string& msg)
 {
     appendConstraintsMsg(malformed,
-                         "Remove the following malformed constraint:",
-                         "Remove the following malformed constraints:",
+                         "Please remove the following malformed constraint:",
+                         "Please remove the following malformed constraints:",
                          msg);
 }
 

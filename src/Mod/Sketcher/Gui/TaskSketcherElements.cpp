@@ -62,51 +62,28 @@ using namespace Gui::TaskView;
 // Translation block for context menu: do not remove
 #if 0
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Point Coincidence");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Point on Object");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Vertical Constraint");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Horizontal Constraint");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Parallel Constraint");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Perpendicular Constraint");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Tangent Constraint");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Equal Constraint");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Symmetric Constraint");
-
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Equal Length");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Symmetric");
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Block Constraint");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Lock Position");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Horizontal Dimension");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Vertical Dimension");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Length Dimension");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Radius Dimension");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Diameter Dimension");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Radius or Diameter Dimension");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Angle Dimension");
-
-QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Construction Geometry");
-
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Lock Constraint");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Horizontal Distance");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Vertical Distance");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Length Constraint");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Radius Constraint");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Diameter Constraint");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Radiam Constraint");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Angle Constraint");
+QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Toggle construction geometry");
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Select Constraints");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Select Origin");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Select Horizontal Axis");
-
 QT_TRANSLATE_NOOP("SketcherGui::ElementView", "Select Vertical Axis");
-
 #endif
 
 /// Inserts a QAction into an existing menu
@@ -690,90 +667,90 @@ void ElementView::contextMenuEvent(QContextMenuEvent* event)
 
     // CONTEXT_ITEM(ICONSTR,NAMESTR,CMDSTR,FUNC,ACTSONSELECTION)
     CONTEXT_ITEM("Constraint_PointOnPoint",
-                 "Point coincidence",
+                 "Point Coincidence",
                  "Sketcher_ConstrainCoincident",
                  doPointCoincidence,
                  true)
     CONTEXT_ITEM("Constraint_PointOnObject",
-                 "Point on object",
+                 "Point on Object",
                  "Sketcher_ConstrainPointOnObject",
                  doPointOnObjectConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Horizontal",
-                 "Horizontal constraint",
+                 "Horizontal Constraint",
                  "Sketcher_ConstrainHorizontal",
                  doHorizontalConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Vertical",
-                 "Vertical constraint",
+                 "Vertical Constraint",
                  "Sketcher_ConstrainVertical",
                  doVerticalConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Parallel",
-                 "Parallel constraint",
+                 "Parallel Constraint",
                  "Sketcher_ConstrainParallel",
                  doParallelConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Perpendicular",
-                 "Perpendicular constraint",
+                 "Perpendicular Constraint",
                  "Sketcher_ConstrainPerpendicular",
                  doPerpendicularConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Tangent",
-                 "Tangent constraint",
+                 "Tangent Constraint",
                  "Sketcher_ConstrainTangent",
                  doTangentConstraint,
                  true)
     CONTEXT_ITEM("Constraint_EqualLength",
-                 "Equal constraint",
+                 "Equal Length",
                  "Sketcher_ConstrainEqual",
                  doEqualConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Symmetric",
-                 "Symmetric constraint",
+                 "Symmetric",
                  "Sketcher_ConstrainSymmetric",
                  doSymmetricConstraint,
                  true)
     CONTEXT_ITEM(
-        "Constraint_Block", "Block constraint", "Sketcher_ConstrainBlock", doBlockConstraint, true)
+        "Constraint_Block", "Block Constraint", "Sketcher_ConstrainBlock", doBlockConstraint, true)
 
     CONTEXT_ITEM("Constraint_HorizontalDistance",
-                 "Horizontal dimension",
+                 "Horizontal Distance",
                  "Sketcher_ConstrainDistanceX",
                  doHorizontalDistance,
                  true)
     CONTEXT_ITEM("Constraint_VerticalDistance",
-                 "Vertical dimension",
+                 "Vertical Distance",
                  "Sketcher_ConstrainDistanceY",
                  doVerticalDistance,
                  true)
     CONTEXT_ITEM("Constraint_Length",
-                 "Length dimension",
+                 "Length Constraint",
                  "Sketcher_ConstrainDistance",
                  doLengthConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Radiam",
-                 "Radius or diameter",
+                 "Radiam Constraint",
                  "Sketcher_ConstrainRadiam",
                  doRadiamConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Radius",
-                 "Radius",
+                 "Radius Constraint",
                  "Sketcher_ConstrainRadius",
                  doRadiusConstraint,
                  true)
     CONTEXT_ITEM("Constraint_Diameter",
-                 "Diameter",
+                 "Diameter Constraint",
                  "Sketcher_ConstrainDiameter",
                  doDiameterConstraint,
                  true)
     CONTEXT_ITEM("Constraint_InternalAngle",
-                 "Angle",
+                 "Angle Constraint",
                  "Sketcher_ConstrainAngle",
                  doAngleConstraint,
                  true)
     CONTEXT_ITEM(
-        "Constraint_Lock", "Lock", "Sketcher_ConstrainLock", doLockConstraint, true)
+        "Constraint_Lock", "Lock Constraint", "Sketcher_ConstrainLock", doLockConstraint, true)
 
     menu.addSeparator();
 
@@ -786,19 +763,19 @@ void ElementView::contextMenuEvent(QContextMenuEvent* event)
     menu.addSeparator();
 
     CONTEXT_ITEM("Sketcher_SelectConstraints",
-                 "Select constraints",
+                 "Select Constraints",
                  "Sketcher_SelectConstraints",
                  doSelectConstraints,
                  true)
     CONTEXT_ITEM(
         "Sketcher_SelectOrigin", "Select Origin", "Sketcher_SelectOrigin", doSelectOrigin, false)
     CONTEXT_ITEM("Sketcher_SelectHorizontalAxis",
-                 "Select horizontal axis",
+                 "Select Horizontal Axis",
                  "Sketcher_SelectHorizontalAxis",
                  doSelectHAxis,
                  false)
     CONTEXT_ITEM("Sketcher_SelectVerticalAxis",
-                 "Select vertical axis",
+                 "Select Vertical Axis",
                  "Sketcher_SelectVerticalAxis",
                  doSelectVAxis,
                  false)
@@ -1921,21 +1898,21 @@ void TaskSketcherElements::slotElementsChanged()
                                   ? (QStringLiteral("-") + tr("Construction"))
                                   : (internalAligned ? (QStringLiteral("-") + tr("Internal"))
                                                      : QStringLiteral("")))
-                                      : (QStringLiteral("%1-").arg(i) + tr("Elliptical arc")))
+                                      : (QStringLiteral("%1-").arg(i) + tr("Elliptical Arc")))
                 : type == Part::GeomArcOfHyperbola::getClassTypeId()
                 ? (isNamingBoxChecked ? (tr("Hyperbolic Arc") + IdInformation())
                            + (construction
                                   ? (QStringLiteral("-") + tr("Construction"))
                                   : (internalAligned ? (QStringLiteral("-") + tr("Internal"))
                                                      : QStringLiteral("")))
-                                      : (QStringLiteral("%1-").arg(i) + tr("Hyperbolic arc")))
+                                      : (QStringLiteral("%1-").arg(i) + tr("Hyperbolic Arc")))
                 : type == Part::GeomArcOfParabola::getClassTypeId()
                 ? (isNamingBoxChecked ? (tr("Parabolic Arc") + IdInformation())
                            + (construction
                                   ? (QStringLiteral("-") + tr("Construction"))
                                   : (internalAligned ? (QStringLiteral("-") + tr("Internal"))
                                                      : QStringLiteral("")))
-                                      : (QStringLiteral("%1-").arg(i) + tr("Parabolic arc")))
+                                      : (QStringLiteral("%1-").arg(i) + tr("Parabolic Arc")))
                 : type == Part::GeomBSplineCurve::getClassTypeId()
                 ? (isNamingBoxChecked ? (tr("B-spline") + IdInformation())
                            + (construction
@@ -2039,15 +2016,15 @@ void TaskSketcherElements::slotElementsChanged()
                     : type == Part::GeomArcOfEllipse::getClassTypeId()
                     ? (isNamingBoxChecked
                            ? (tr("Elliptical Arc") + linkname)
-                           : (QStringLiteral("%1-").arg(i - 2) + tr("Elliptical arc")))
+                           : (QStringLiteral("%1-").arg(i - 2) + tr("Elliptical Arc")))
                     : type == Part::GeomArcOfHyperbola::getClassTypeId()
                     ? (isNamingBoxChecked
                            ? (tr("Hyperbolic Arc") + linkname)
-                           : (QStringLiteral("%1-").arg(i - 2) + tr("Hyperbolic arc")))
+                           : (QStringLiteral("%1-").arg(i - 2) + tr("Hyperbolic Arc")))
                     : type == Part::GeomArcOfParabola::getClassTypeId()
                     ? (isNamingBoxChecked
                            ? (tr("Parabolic Arc") + linkname)
-                           : (QStringLiteral("%1-").arg(i - 2) + tr("Parabolic arc")))
+                           : (QStringLiteral("%1-").arg(i - 2) + tr("Parabolic Arc")))
                     : type == Part::GeomBSplineCurve::getClassTypeId()
                     ? (isNamingBoxChecked ? (tr("B-spline") + linkname)
                                           : (QStringLiteral("%1-").arg(i - 2) + tr("B-spline")))

@@ -98,7 +98,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Minimum scalar</string>
+        <string>Min scalar</string>
        </property>
       </widget>
      </item>
@@ -118,7 +118,7 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string>Maximum scalar</string>
+        <string>Max scalar</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

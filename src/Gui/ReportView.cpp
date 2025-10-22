@@ -241,7 +241,7 @@ public:
     }
     static bool showOnError()
     {
-        return getGroup()->GetBool("checkShowReportViewOnError", false);
+        return getGroup()->GetBool("checkShowReportViewOnError", true);
     }
     static void toggleShowOnError()
     {

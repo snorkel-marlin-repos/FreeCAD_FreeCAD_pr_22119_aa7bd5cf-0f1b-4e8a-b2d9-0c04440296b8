@@ -23,7 +23,8 @@
     </rect>
    </property>
    <property name="text">
-    <string>Initial temperature</string>
+    <string>Insert component's
+ initial temperature:</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
@@ -39,7 +40,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Temperature</string>
+    <string>Temperature:</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit">

@@ -132,10 +132,11 @@ class ViewProvider:
         self.axs.axisLength.setValue(1.2)
 
         # enum values for SoFCPlacementIndicatorKit
-        parts = FreeCADGui.PlacementIndicatorParts
-        self.axs.parts.setValue(
-            parts.Axes | parts.Labels | parts.ArrowHeads | parts.OriginIndicator
-        )
+        AXES = 1
+        LABELS = 4
+        ARROWHEADS = 8
+
+        self.axs.parts.setValue(AXES | LABELS | ARROWHEADS)
 
         self.sep.addChild(self.axs)
         self.switch.addChild(self.sep)
@@ -149,15 +150,6 @@ class ViewProvider:
     def onChanged(self, vobj, prop):
         if prop == "Visibility":
             self.showOriginAxis(vobj.Visibility)
-
-            # if we're currently restoring the document we do NOT want to call
-            # hideXXX as this would mark all currently hidden children as
-            # explicitly hidden by the user and prevent showing them when
-            # showing the job
-
-            if self.obj.Document.Restoring:
-                return
-
             if vobj.Visibility:
                 self.restoreOperationsVisibility()
                 self.restoreModelsVisibility()
@@ -178,8 +170,7 @@ class ViewProvider:
     def restoreOperationsVisibility(self):
         if hasattr(self, "operationsVisibility"):
             for op in self.obj.Operations.Group:
-                if self.operationsVisibility.get(op.Name, True):
-                    op.Visibility = True
+                op.Visibility = self.operationsVisibility[op.Name]
         else:
             for op in self.obj.Operations.Group:
                 op.Visibility = True
@@ -192,12 +183,11 @@ class ViewProvider:
 
     def restoreModelsVisibility(self):
         if hasattr(self, "modelsVisibility"):
-            for model in self.obj.Model.Group:
-                if self.modelsVisibility.get(model.Name, True):
-                    model.Visibility = True
+            for base in self.obj.Model.Group:
+                base.Visibility = self.modelsVisibility[base.Name]
         else:
-            for model in self.obj.Model.Group:
-                model.Visibility = True
+            for base in self.obj.Model.Group:
+                base.Visibility = True
 
     def hideStock(self):
         self.stockVisibility = self.obj.Stock.Visibility
@@ -205,8 +195,7 @@ class ViewProvider:
 
     def restoreStockVisibility(self):
         if hasattr(self, "stockVisibility"):
-            if self.stockVisibility:
-                self.obj.Stock.Visibility = True
+            self.obj.Stock.Visibility = self.stockVisibility
 
     def hideTools(self):
         self.toolsVisibility = {}
@@ -217,8 +206,7 @@ class ViewProvider:
     def restoreToolsVisibility(self):
         if hasattr(self, "toolsVisibility"):
             for tc in self.obj.Tools.Group:
-                if self.toolsVisibility.get(tc.Tool.Name, True):
-                    tc.Tool.Visibility = True
+                tc.Tool.Visibility = self.toolsVisibility[tc.Tool.Name]
 
     def showOriginAxis(self, yes):
         sw = coin.SO_SWITCH_ALL if yes else coin.SO_SWITCH_NONE

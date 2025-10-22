@@ -50,6 +50,7 @@ public:
     short mustExecute() const override;
     const char* getViewProviderName() const override {
         return "PartGui::ViewProviderRuledSurface";
+    void setupObject();
     }
     //@}
 
@@ -85,6 +86,7 @@ public:
     const char* getViewProviderName() const override {
         return "PartGui::ViewProviderLoft";
     }
+    void setupObject() override;
     //@}
 
 protected:
@@ -116,6 +118,7 @@ public:
     const char* getViewProviderName() const override {
         return "PartGui::ViewProviderSweep";
     }
+    void setupObject() override;
     //@}
 
 protected:

@@ -106,7 +106,7 @@ void ViewProviderSheet::exportAsFile()
     QString selectedFilter;
     QString formatList = QObject::tr("CSV (*.csv *.CSV);;All (*)");
     QString fileName = Gui::FileDialog::getSaveFileName(Gui::getMainWindow(),
-                                                        QObject::tr("Export File"),
+                                                        QObject::tr("Export file"),
                                                         QString(),
                                                         formatList,
                                                         &selectedFilter);
@@ -131,7 +131,7 @@ void ViewProviderSheet::exportAsFile()
 void ViewProviderSheet::setupContextMenu(QMenu* menu, QObject* receiver, const char* member)
 {
     QAction* act;
-    act = menu->addAction(QObject::tr("Show Spreadsheet"), receiver, member);
+    act = menu->addAction(QObject::tr("Show spreadsheet"), receiver, member);
     act->setData(QVariant((int)ViewProvider::Default));
 }
 

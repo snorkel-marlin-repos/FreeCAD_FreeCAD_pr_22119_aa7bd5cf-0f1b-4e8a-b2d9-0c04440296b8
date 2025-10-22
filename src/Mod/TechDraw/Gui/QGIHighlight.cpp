@@ -64,8 +64,6 @@ QGIHighlight::~QGIHighlight()
 
 }
 
-
-// QGIHighlight is no longer dragged except through TaskDetail.
 void QGIHighlight::onDragFinished()
 {
 //    Base::Console().message("QGIH::onDragFinished - pos: %s\n",

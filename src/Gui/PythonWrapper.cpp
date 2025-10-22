@@ -392,39 +392,34 @@ public:
      */
     void addQObject(QObject* obj, PyObject* pyobj)
     {
-        // static array to contain created connections so they can be safely disconnected later
-        static std::map<QObject*, QMetaObject::Connection> connections = {};
-
-        const auto PyW_uniqueName = QString::number(reinterpret_cast<quintptr>(pyobj));
-        auto PyW_invalidator = findChild<QObject*>(PyW_uniqueName, Qt::FindDirectChildrenOnly);
+        const auto PyW_unique_name = QString::number(reinterpret_cast <quintptr> (pyobj));
+        auto PyW_invalidator = findChild <QObject *> (PyW_unique_name, Qt::FindDirectChildrenOnly);
 
         if (PyW_invalidator == nullptr) {
             PyW_invalidator = new QObject(this);
-            PyW_invalidator->setObjectName(PyW_uniqueName);
+            PyW_invalidator->setObjectName(PyW_unique_name);
 
             Py_INCREF (pyobj);
         }
-        else if (connections.contains(PyW_invalidator)) {
-            disconnect(connections[PyW_invalidator]);
-            connections.erase(PyW_invalidator);
+        else {
+            PyW_invalidator->disconnect();
         }
 
-        auto destroyedFun = [pyobj]() {
+        auto destroyedFun = [pyobj](){
             Base::PyGILStateLocker lock;
-
-            if (auto sbkPtr = reinterpret_cast<SbkObject*>(pyobj); sbkPtr != nullptr) {
-                Shiboken::Object::setValidCpp(sbkPtr, false);
+            auto sbk_ptr = reinterpret_cast <SbkObject *> (pyobj);
+            if (sbk_ptr != nullptr) {
+                Shiboken::Object::setValidCpp(sbk_ptr, false);
             }
             else {
                 Base::Console().developerError("WrapperManager", "A QObject has just been destroyed after its Pythonic wrapper.\n");
             }
-
             Py_DECREF (pyobj);
         };
 
-        connections[PyW_invalidator] = connect(PyW_invalidator, &QObject::destroyed, this, destroyedFun);
-        connect(obj, &QObject::destroyed, PyW_invalidator, &QObject::deleteLater);
-    }
+        QObject::connect(PyW_invalidator, &QObject::destroyed, this, destroyedFun);
+        QObject::connect(obj, &QObject::destroyed, PyW_invalidator, &QObject::deleteLater);
+}
 
 private:
     void wrapQApplication()

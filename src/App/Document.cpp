@@ -262,9 +262,8 @@ bool Document::redo(const int id)
     return false;
 }
 
-void Document::changePropertyOfObject(TransactionalObject* obj,
-                                      const Property* prop,
-                                      const std::function<void()>& changeFunc)
+void Document::addOrRemovePropertyOfObject(TransactionalObject* obj,
+                                           const Property* prop, const bool add)
 {
     if (!prop || !obj || !obj->isAttachedToDocument()) {
         return;
@@ -279,24 +278,8 @@ void Document::changePropertyOfObject(TransactionalObject* obj,
         }
     }
     if (d->activeUndoTransaction && !d->rollback) {
-        changeFunc();
-    }
-}
-
-void Document::renamePropertyOfObject(TransactionalObject* obj,
-                                      const Property* prop, const char* oldName)
-{
-    changePropertyOfObject(obj, prop, [this, obj, prop, oldName]() {
-        d->activeUndoTransaction->renameProperty(obj, prop, oldName);
-    });
-}
-
-void Document::addOrRemovePropertyOfObject(TransactionalObject* obj,
-                                           const Property* prop, const bool add)
-{
-    changePropertyOfObject(obj, prop, [this, obj, prop, add]() {
         d->activeUndoTransaction->addOrRemoveProperty(obj, prop, add);
-    });
+    }
 }
 
 bool Document::isPerformingTransaction() const

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Show Result</string>
+   <string>Show result</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
@@ -23,7 +23,7 @@
       </size>
      </property>
      <property name="title">
-      <string>Result Type</string>
+      <string>Result type</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -53,7 +53,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Displacement magnitude</string>
+           <string>Displacement Magnitude</string>
           </property>
          </widget>
         </item>
@@ -80,7 +80,7 @@
         <item row="2" column="1">
          <widget class="QRadioButton" name="rb_maxprin">
           <property name="text">
-           <string>Maximum principal stress</string>
+           <string>Max Principal Stress</string>
           </property>
          </widget>
         </item>
@@ -100,7 +100,7 @@
         <item row="3" column="1">
          <widget class="QRadioButton" name="rb_minprin">
           <property name="text">
-           <string>Minimum principal stress</string>
+           <string>Min Principal Stress</string>
           </property>
          </widget>
         </item>
@@ -120,7 +120,7 @@
         <item row="4" column="1">
          <widget class="QRadioButton" name="rb_max_shear_stress">
           <property name="text">
-           <string>Maximum shear stress (Tresca)</string>
+           <string>Max Shear Stress (Tresca)</string>
           </property>
          </widget>
         </item>
@@ -133,14 +133,14 @@
            </size>
           </property>
           <property name="text">
-           <string>Equivalent plastic strain</string>
+           <string>Equivalent Plastic Strain</string>
           </property>
          </widget>
         </item>
         <item row="5" column="1">
          <widget class="QRadioButton" name="rb_massflowrate">
           <property name="text">
-           <string>Mass flow rate</string>
+           <string>Mass Flow Rate</string>
           </property>
          </widget>
         </item>
@@ -160,7 +160,7 @@
         <item row="6" column="1">
          <widget class="QRadioButton" name="rb_networkpressure">
           <property name="text">
-           <string>Network pressure</string>
+           <string>Network Pressure</string>
           </property>
          </widget>
         </item>
@@ -178,7 +178,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Minimum</string>
+           <string>Min:</string>
           </property>
          </widget>
         </item>
@@ -198,7 +198,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Maximum</string>
+           <string>Max:</string>
           </property>
          </widget>
         </item>
@@ -309,7 +309,7 @@
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Slider maximum</string>
+           <string>Slider Max</string>
           </property>
          </widget>
         </item>
@@ -379,7 +379,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Number of steps per cycle</string>
+          <string>Number of Steps per Cycle</string>
          </property>
         </widget>
        </item>
@@ -426,7 +426,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Number of cycles</string>
+          <string>Number of Cycles</string>
          </property>
         </widget>
        </item>
@@ -464,7 +464,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Frame rate</string>
+          <string>Frame Rate</string>
          </property>
         </widget>
        </item>
@@ -519,7 +519,7 @@
       </size>
      </property>
      <property name="title">
-      <string>User-Defined Equation</string>
+      <string>User defined equation</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>

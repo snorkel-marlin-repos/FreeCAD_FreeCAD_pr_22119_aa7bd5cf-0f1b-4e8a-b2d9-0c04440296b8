@@ -22,12 +22,13 @@
 
 """Widget for editing a ToolBit object."""
 
+from functools import partial
 import FreeCAD
 import FreeCADGui
 from PySide import QtGui, QtCore
-from ...shape.ui.shapewidget import ShapeWidget
-from ...docobject.ui import DocumentObjectEditorWidget
 from ..models.base import ToolBit
+from ...shape.ui.shapewidget import ShapeWidget
+from ...ui.docobject import DocumentObjectEditorWidget
 
 
 class ToolBitPropertiesWidget(QtGui.QWidget):
@@ -48,9 +49,7 @@ class ToolBitPropertiesWidget(QtGui.QWidget):
         self._id_label = QtGui.QLabel()  # Read-only ID
         self._id_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
 
-        theicon = toolbit.get_icon() if toolbit else None
-        abbr = theicon.abbreviations if theicon else {}
-        self._property_editor = DocumentObjectEditorWidget(property_suffixes=abbr)
+        self._property_editor = DocumentObjectEditorWidget()
         self._property_editor.setSizePolicy(
             QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
         )

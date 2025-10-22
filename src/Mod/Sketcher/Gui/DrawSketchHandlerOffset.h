@@ -191,15 +191,6 @@ private:
         generateSourceWires();
     }
 
-public:
-    std::list<Gui::InputHint> getToolHints() const override
-    {
-        using enum Gui::InputHint::UserInput;
-
-        return {{QObject::tr("%1 set offset direction and distance", "Sketcher Offset: hint"),
-                 {MouseLeft}}};
-    }
-
 private:
     class CoincidencePointPos
     {

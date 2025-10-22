@@ -118,12 +118,6 @@ public:
     unsigned int getFrameNumber();
     std::vector<double> getFrameValues();
 
-    // output algorithm handling
-    vtkSmartPointer<vtkAlgorithm> getOutputAlgorithm()
-    {
-        return m_source_algorithm;
-    }
-
 protected:
     void onChanged(const App::Property* prop) override;
     bool allowObject(App::DocumentObject* obj) override;

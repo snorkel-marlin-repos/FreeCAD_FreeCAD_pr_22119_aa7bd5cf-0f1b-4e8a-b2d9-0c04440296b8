@@ -940,11 +940,12 @@ bool MaterialsEditor::updateTexturePreview() const
         try {
             auto property = _material->getAppearanceProperty(QStringLiteral("TextureImage"));
             if (!property->isNull()) {
+                // Base::Console().log("Has 'TextureImage'\n");
                 auto propertyValue = property->getString();
                 if (!propertyValue.isEmpty()) {
                     QByteArray by = QByteArray::fromBase64(propertyValue.toUtf8());
-                    image = QImage::fromData(by);
-                    hasImage = !image.isNull();
+                    image = QImage::fromData(by, "PNG");  //.scaled(64, 64, Qt::KeepAspectRatio);
+                    hasImage = true;
                 }
             }
         }
@@ -961,11 +962,9 @@ bool MaterialsEditor::updateTexturePreview() const
                     if (!image.load(filePath)) {
                         Base::Console().log("Unable to load image '%s'\n",
                                             filePath.toStdString().c_str());
-                        hasImage = false;
+                        // return;  // ???
                     }
-                    else {
-                        hasImage = !image.isNull();
-                    }
+                    hasImage = true;
                 }
             }
             catch (const Materials::PropertyNotFound&) {

@@ -820,7 +820,6 @@ class _SectionPlane:
 
     def __init__(self,obj):
         obj.Proxy = self
-        self.Type = "SectionPlane"
         self.setProperties(obj)
 
     def setProperties(self,obj):
@@ -842,6 +841,7 @@ class _SectionPlane:
             obj.UseMaterialColorForFill = False
         if not "Depth" in pl:
             obj.addProperty("App::PropertyLength","Depth","SectionPlane",QT_TRANSLATE_NOOP("App::Property","Geometry further than this value will be cut off. Keep zero for unlimited."), locked=True)
+        self.Type = "SectionPlane"
 
     def onDocumentRestored(self,obj):
 
@@ -883,7 +883,7 @@ class _SectionPlane:
 
     def loads(self,state):
 
-        self.Type = "SectionPlane"
+        return None
 
 
 class _ViewProviderSectionPlane:
@@ -1173,7 +1173,7 @@ class _ViewProviderSectionPlane:
         actionToggleCutview = QtGui.QAction(QtGui.QIcon(":/icons/Draft_Edit.svg"),
                                             translate("Arch", "Toggle Cutview"),
                                             menu)
-        actionToggleCutview.triggered.connect(lambda: self.toggleCutview(vobj))
+        actionToggleCutview.triggered.connect(lambda f=self.toggleCutview, arg=vobj: f(arg))
         menu.addAction(actionToggleCutview)
 
     def edit(self):

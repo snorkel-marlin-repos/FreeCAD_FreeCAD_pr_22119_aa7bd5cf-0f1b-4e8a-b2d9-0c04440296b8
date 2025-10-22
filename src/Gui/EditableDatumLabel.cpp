@@ -33,13 +33,8 @@
 
 #include <QEvent>
 #include <QKeyEvent>
-#include <QPixmap>
-#include <QLabel>
-#include <QHBoxLayout>
-#include <QString>
 
 #include <Gui/Application.h>
-#include <Gui/BitmapFactory.h>
 #include <Gui/View3DInventor.h>
 #include <Gui/View3DInventorViewer.h>
 
@@ -67,7 +62,6 @@ EditableDatumLabel::EditableDatumLabel(View3DInventorViewer* view,
     , value(0.0)
     , viewer(view)
     , spinBox(nullptr)
-    , lockIconLabel(nullptr)
     , cameraSensor(nullptr)
     , function(Function::Positioning)
 {
@@ -157,9 +151,6 @@ void EditableDatumLabel::startEdit(double val, QObject* eventFilteringObj, bool 
         return;
     }
 
-    // Reset locked state when starting to edit
-    this->resetLockedState();
-
     QWidget* mdi = viewer->parentWidget();
 
     label->string = " ";
@@ -215,42 +206,13 @@ bool EditableDatumLabel::eventFilter(QObject* watched, QEvent* event)
 {
     if (event->type() == QEvent::KeyPress) {
         auto* keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Tab) {
+        if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
 
             if (auto* spinBox = qobject_cast<QAbstractSpinBox*>(watched)) {
-                // if tab has been pressed and user did not type anything previously,
-                // then just cycle but don't lock anything, otherwise we lock the label
-                if (keyEvent->key() == Qt::Key_Tab && !this->isSet) {
-                    if (!this->spinBox->hasValidInput()) {
-                        Q_EMIT this->spinBox->valueChanged(this->value);
-                        return true;
-                    }
-                    return false;
-                }
-
-                // for ctrl + enter we accept values as they are
-                if (keyEvent->modifiers() & Qt::ControlModifier) {
-                    Q_EMIT this->finishEditingOnAllOVPs();
-                    return true;
-                }
-                else {
-                    // regular enter
-                    this->hasFinishedEditing = true;
-                    Q_EMIT this->spinBox->valueChanged(this->value);
-
-                    // only set lock state if it passed validation
-                    // (validation can unset isSet if value didn't pass
-                    // confusion point for example)
-                    if (this->isSet)
-                        this->setLockedAppearance(true);
-                    return true;
-                }
+                this->hasFinishedEditing = true;
+                Q_EMIT this->valueChanged(this->value);
+                return false;
             }
-        }
-        else if (this->hasFinishedEditing && keyEvent->key() != Qt::Key_Tab)
-        {
-            this->setLockedAppearance(false);
-            return false;
         }
     }
 
@@ -271,9 +233,6 @@ void EditableDatumLabel::stopEdit()
 
         spinBox->deleteLater();
         spinBox = nullptr;
-        
-        // Lock icon will be automatically destroyed as it's a child of spinbox
-        lockIconLabel = nullptr;
     }
 }
 
@@ -352,19 +311,6 @@ void EditableDatumLabel::positionSpinbox()
     pxCoord.setX(posX);
     pxCoord.setY(posY);
     spinBox->move(pxCoord);
-    
-    // Update lock icon position inside the spinbox if it exists and is visible
-    if (lockIconLabel && lockIconLabel->isVisible()) {
-        int iconSize = 14;
-        int padding = 4;
-        QSize spinboxSize = spinBox->size();
-        lockIconLabel->setGeometry(
-            spinboxSize.width() - iconSize - padding,
-            (spinboxSize.height() - iconSize) / 2,
-            iconSize,
-            iconSize
-        );
-    }
 }
 
 SbVec3f EditableDatumLabel::getTextCenterPoint() const
@@ -493,63 +439,6 @@ void EditableDatumLabel::setLabelAutoDistanceReverse(bool val)
 void EditableDatumLabel::setSpinboxVisibleToMouse(bool val)
 {
     spinBox->setAttribute(Qt::WA_TransparentForMouseEvents, !val);
-}
-
-void EditableDatumLabel::setLockedAppearance(bool locked)
-{
-    if (locked) {
-        if (spinBox) {
-            
-            // create lock icon label it it doesn't exist, if it does - show it
-            if (!lockIconLabel) {
-                lockIconLabel = new QLabel(spinBox);
-                lockIconLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-                lockIconLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-
-                // load icon and scale it to fit in spinbox
-                QPixmap lockIcon = Gui::BitmapFactory().pixmap("Constraint_Lock");
-                QPixmap scaledIcon =
-                    lockIcon.scaled(14, 14, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-                lockIconLabel->setPixmap(scaledIcon);
-
-                // position lock icon inside the spinbox
-                int iconSize = 14;
-                int padding = 4;
-                QSize spinboxSize = spinBox->size();
-                lockIconLabel->setGeometry(spinboxSize.width() - iconSize - padding,
-                                           (spinboxSize.height() - iconSize) / 2,
-                                           iconSize,
-                                           iconSize);
-                // style spinbox and add padding for lock
-                QString styleSheet = QString::fromLatin1("QSpinBox { "
-                                                         "padding-right: %1px; "
-                                                         "}")
-                                         .arg(iconSize + padding + 2);
-
-                spinBox->setStyleSheet(styleSheet);
-            }
-
-            lockIconLabel->show();
-        }
-    } else {
-        this->hasFinishedEditing = false;
-
-        // if spinbox exists, reset its appearance
-        if (spinBox) {
-            spinBox->setStyleSheet(QString());
-            
-            // hide lock icon if it exists for later reuse
-            if (lockIconLabel) {
-                lockIconLabel->hide();
-            }
-        }
-    }
-}
-
-void EditableDatumLabel::resetLockedState()
-{
-    hasFinishedEditing = false;
-    setLockedAppearance(false);
 }
 
 EditableDatumLabel::Function EditableDatumLabel::getFunction()

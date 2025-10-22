@@ -275,7 +275,6 @@ class _Building(ArchFloor._Floor):
     def __init__(self,obj):
 
         ArchFloor._Floor.__init__(self,obj)
-        self.Type = "Building"
         self.setProperties(obj)
         obj.IfcType = "Building"
 
@@ -286,15 +285,12 @@ class _Building(ArchFloor._Floor):
             obj.addProperty("App::PropertyEnumeration","BuildingType","Arch",QT_TRANSLATE_NOOP("App::Property","The type of this building"), locked=True)
             obj.BuildingType = BuildingTypes
         obj.setEditorMode('Height',2)
+        self.Type = "Building"
 
     def onDocumentRestored(self,obj):
 
         ArchFloor._Floor.onDocumentRestored(self,obj)
         self.setProperties(obj)
-
-    def loads(self,state):
-
-        self.Type = "Building"
 
 
 class _ViewProviderBuilding(ArchFloor._ViewProviderFloor):

@@ -38,7 +38,6 @@
 #ifdef FC_USE_VTK_PYTHON
 #include <vtkUnstructuredGrid.h>
 #include <vtkPythonUtil.h>
-#include <vtkPolyData.h>
 #endif  // BUILD_FEM_VTK
 
 using namespace Fem;
@@ -130,9 +129,6 @@ PyObject* FemPostFilterPy::getInputData(PyObject* args)
         case VTK_UNSTRUCTURED_GRID:
             copy = vtkUnstructuredGrid::New();
             break;
-        case VTK_POLY_DATA:
-            copy = vtkPolyData::New();
-            break;
         default:
             PyErr_SetString(PyExc_TypeError,
                             "cannot return datatype object; not unstructured grid");
@@ -185,25 +181,6 @@ PyObject* FemPostFilterPy::getInputScalarFields(PyObject* args)
     }
 
     return Py::new_reference_to(list);
-}
-
-PyObject* FemPostFilterPy::getOutputAlgorithm(PyObject* args)
-{
-#ifdef FC_USE_VTK_PYTHON
-    // we take no arguments
-    if (!PyArg_ParseTuple(args, "")) {
-        return nullptr;
-    }
-
-    // return python object for the algorithm
-    auto algorithm = getFemPostFilterPtr()->getFilterOutput();
-    PyObject* py_algorithm = vtkPythonUtil::GetObjectFromPointer(algorithm);
-
-    return Py::new_reference_to(py_algorithm);
-#else
-    PyErr_SetString(PyExc_NotImplementedError, "VTK python wrapper not available");
-    Py_Return;
-#endif
 }
 
 PyObject* FemPostFilterPy::getCustomAttributes(const char* /*attr*/) const

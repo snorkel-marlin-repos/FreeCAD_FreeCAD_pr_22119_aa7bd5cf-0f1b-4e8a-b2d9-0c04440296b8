@@ -42,7 +42,6 @@ class Ui_TaskPostWarpVector;
 class Ui_TaskPostCut;
 class Ui_TaskPostFrames;
 class Ui_TaskPostBranch;
-class Ui_TaskPostExtraction;
 
 class SoFontStyle;
 class SoText2;
@@ -156,12 +155,6 @@ public:
     // executed when the apply button is pressed in the task dialog
     virtual void apply() {};
 
-    // returns if the widget shall be collapsed when opening the task dialog
-    virtual bool initiallyCollapsed()
-    {
-        return false;
-    };
-
 protected:
     App::DocumentObject* getObject() const
     {
@@ -194,15 +187,10 @@ protected:
 
     static void updateEnumerationList(App::PropertyEnumeration&, QComboBox* box);
 
-    // object update handling
-    void handlePropertyChange(const App::DocumentObject&, const App::Property&);
-    virtual void onPostDataChanged(Fem::FemPostObject*) {};
-
 private:
     QPixmap m_icon;
     App::DocumentObjectWeakPtrT m_object;
     Gui::ViewProviderWeakPtrT m_view;
-    boost::signals2::connection m_connection;
 };
 
 
@@ -240,9 +228,6 @@ public:
 
     /// returns for Close and Help button
     QDialogButtonBox::StandardButtons getStandardButtons() const override;
-
-    /// makes sure all widgets are collapsed, if they want to be
-    void processCollapsedWidgets();
 
 protected:
     void recompute();
@@ -282,6 +267,7 @@ private:
     std::unique_ptr<Ui_TaskPostDisplay> ui;
 };
 
+
 // ***************************************************************************
 // functions
 class ViewProviderFemPostFunction;
@@ -308,8 +294,6 @@ public:
     ~TaskPostFrames() override;
 
     void applyPythonCode() override;
-
-    bool initiallyCollapsed() override;
 
 private:
     void setupConnections();
@@ -593,6 +577,7 @@ private:
     void onOperatorsActivated(int index);
 
 private:
+    QWidget* proxy;
     std::unique_ptr<Ui_TaskPostCalculator> ui;
 };
 

@@ -1,5 +1,5 @@
 Gui--DockWnd--ReportOutput,
-Gui--TaskView--TaskView QScrollArea {
+Gui--TaskView--TaskView {
   border: none;
 }
 
