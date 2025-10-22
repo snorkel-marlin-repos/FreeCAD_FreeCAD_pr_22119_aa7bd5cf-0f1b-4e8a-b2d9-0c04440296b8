@@ -107,11 +107,9 @@ protected:
     std::vector<MillPathSegment*> MillPathSegments;
     std::ostringstream mFpsStream;
 
-    // clang-format off
-    MillMotion mZeroPos = {.cmd=eNop, .tool=-1, .x=0, .y=0, .z=100, .i=0, .j=0, .k=0, .r=0, .retract_mode='\0', .retract_z=0.0};
-    MillMotion mCurMotion = {.cmd=eNop, .tool=-1, .x=0, .y=0, .z=0, .i=0, .j=0, .k=0, .r=0, .retract_mode='\0', .retract_z=0.0};
-    MillMotion mDestMotion = {.cmd=eNop, .tool=-1, .x=0, .y=0, .z=0, .i=0, .j=0, .k=0, .r=0, .retract_mode='\0', .retract_z=0.0};
-    // clang-format on
+    MillMotion mZeroPos = {eNop, -1, 0, 0, 100, 0, 0, 0, 0};
+    MillMotion mCurMotion = {eNop, -1, 0, 0, 0, 0, 0, 0, 0};
+    MillMotion mDestMotion = {eNop, -1, 0, 0, 0, 0, 0, 0, 0};
 
     StockObject mStockObject;
     SolidObject mBaseShape;

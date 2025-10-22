@@ -558,7 +558,6 @@ def _get_param_dictionary():
         "PrecastHoleSpacing":          ("float",     0.0),
         "PrecastRiser":                ("float",     0.0),
         "PrecastTread":                ("float",     0.0),
-        "ProfilePreset":               ("string",    ""),
         "ScheduleColumnWidth0":        ("int",       100),
         "ScheduleColumnWidth1":        ("int",       100),
         "ScheduleColumnWidth2":        ("int",       50),
@@ -697,11 +696,6 @@ def _get_param_dictionary():
                 elif att_class == "Gui::PrefFontBox":
                     path, entry, value = _param_from_PrefFontBox(widget)
                     typ = "string"
-                elif att_class == "Gui::PrefCheckableGroupBox":
-                    # It's a boolean preference, so we can reuse the parsing logic
-                    # from _param_from_PrefCheckBox, which looks for <property name="checked">.
-                    path, entry, value = _param_from_PrefCheckBox(widget)
-                    typ = "bool"
 
                 if path is not None:
                     if path in param_dict:

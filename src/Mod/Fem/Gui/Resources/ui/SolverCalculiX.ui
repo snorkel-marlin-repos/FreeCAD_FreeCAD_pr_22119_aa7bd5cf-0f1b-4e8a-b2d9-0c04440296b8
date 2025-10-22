@@ -17,7 +17,7 @@
    <item>
     <widget class="QCheckBox" name="ckb_working_directory">
      <property name="text">
-      <string>Working directory</string>
+      <string>Working Directory</string>
      </property>
     </widget>
    </item>
@@ -63,7 +63,7 @@
         <item>
          <widget class="QToolButton" name="pb_working_directory">
           <property name="text">
-           <string>…</string>
+           <string>...</string>
           </property>
          </widget>
         </item>
@@ -83,7 +83,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="lbl_analysis_type">
           <property name="text">
-           <string>Analysis type</string>
+           <string>Analysis Type:</string>
           </property>
          </widget>
         </item>
@@ -123,7 +123,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Time</string>
+         <string>Time:</string>
         </property>
        </widget>
       </item>

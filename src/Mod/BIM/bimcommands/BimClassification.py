@@ -159,10 +159,7 @@ class BIM_Classification:
         self.form.treeClass.itemDoubleClicked.connect(self.apply)
         self.form.search.up.connect(self.onUpArrow)
         self.form.search.down.connect(self.onDownArrow)
-        if hasattr(self.form.onlyVisible, "checkStateChanged"): # Qt version >= 6.7.0
-            self.form.onlyVisible.checkStateChanged.connect(self.onVisible)
-        else: # Qt version < 6.7.0
-            self.form.onlyVisible.stateChanged.connect(self.onVisible)
+        self.form.onlyVisible.stateChanged.connect(self.onVisible)
 
         # center the dialog over FreeCAD window
         mw = FreeCADGui.getMainWindow()
@@ -670,7 +667,7 @@ class BIM_Classification:
                 self.form.treeClass.setCurrentItem(self.form.treeClass.itemBelow(i))
 
     def onVisible(self, index):
-        PARAMS.SetInt("BimClassificationVisibleState", getattr(index, "value", index))
+        PARAMS.SetInt("BimClassificationVisibleState", index)
         self.updateObjects()
 
     def getIcon(self,obj):

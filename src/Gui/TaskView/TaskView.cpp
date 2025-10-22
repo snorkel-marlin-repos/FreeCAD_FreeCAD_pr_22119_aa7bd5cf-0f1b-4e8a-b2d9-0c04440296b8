@@ -32,7 +32,6 @@
 # include <QPointer>
 # include <QPushButton>
 # include <QTimer>
-# include <QVBoxLayout>
 #endif
 
 #include <App/Document.h>
@@ -269,15 +268,9 @@ QSize TaskPanel::minimumSizeHint() const
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 TaskView::TaskView(QWidget *parent)
-    : QWidget(parent),ActiveDialog(nullptr),ActiveCtrl(nullptr)
+    : QScrollArea(parent),ActiveDialog(nullptr),ActiveCtrl(nullptr)
 {
-    mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
-    this->setLayout(mainLayout);
-    scrollArea = new QScrollArea(this);
-
-    taskPanel = new TaskPanel(scrollArea);
+    taskPanel = new TaskPanel(this);
     QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
@@ -285,11 +278,10 @@ TaskView::TaskView(QWidget *parent)
     taskPanel->setSizePolicy(sizePolicy);
     taskPanel->setScheme(QSint::ActionPanelScheme::defaultScheme());
 
-    scrollArea->setWidget(taskPanel);
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setMinimumWidth(200);
-    mainLayout->addWidget(scrollArea, 1);
+    this->setWidget(taskPanel);
+    setWidgetResizable(true);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->setMinimumWidth(200);
 
     Gui::Selection().Attach(this);
 
@@ -369,7 +361,7 @@ bool TaskView::event(QEvent* event)
             }
         }
     }
-    return QWidget::event(event);
+    return QScrollArea::event(event);
 }
 
 void TaskView::keyPressEvent(QKeyEvent* ke)
@@ -431,7 +423,7 @@ void TaskView::keyPressEvent(QKeyEvent* ke)
         }
     }
     else {
-        QWidget::keyPressEvent(ke);
+        QScrollArea::keyPressEvent(ke);
     }
 }
 
@@ -449,7 +441,7 @@ void TaskView::adjustMinimumSizeHint()
 
 QSize TaskView::minimumSizeHint() const
 {
-    QSize ms = QWidget::minimumSizeHint();
+    QSize ms = QScrollArea::minimumSizeHint();
     int spacing = 0;
     if (QLayout* layout = taskPanel->layout()) {
         spacing = 2 * layout->spacing();
@@ -600,8 +592,7 @@ void TaskView::showDialog(TaskDialog *dlg)
     dlg->modifyStandardButtons(ActiveCtrl->buttonBox);
 
     if (dlg->buttonPosition() == TaskDialog::North) {
-        // Add button box to the top of the main layout
-        mainLayout->insertWidget(0, ActiveCtrl);
+        taskPanel->addWidget(ActiveCtrl);
         for (const auto & it : cont){
             taskPanel->addWidget(it);
         }
@@ -610,8 +601,7 @@ void TaskView::showDialog(TaskDialog *dlg)
         for (const auto & it : cont){
             taskPanel->addWidget(it);
         }
-        // Add button box to the bottom of the main layout
-        mainLayout->addWidget(ActiveCtrl);
+        taskPanel->addWidget(ActiveCtrl);
     }
 
     taskPanel->setScheme(QSint::ActionPanelScheme::defaultScheme());
@@ -637,7 +627,7 @@ void TaskView::removeDialog()
     getMainWindow()->updateActions();
 
     if (ActiveCtrl) {
-        mainLayout->removeWidget(ActiveCtrl);
+        taskPanel->removeWidget(ActiveCtrl);
         delete ActiveCtrl;
         ActiveCtrl = nullptr;
     }

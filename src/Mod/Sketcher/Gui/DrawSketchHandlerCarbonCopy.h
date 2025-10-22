@@ -191,7 +191,6 @@ public:
                 return true;
             }
         }
-        updateHint();
         return false;
     }
 
@@ -218,13 +217,6 @@ private:
     {
         Q_UNUSED(sketchgui);
         setAxisPickStyle(true);
-    }
-
-public:
-    std::list<Gui::InputHint> getToolHints() const override
-    {
-        return {{QObject::tr("%1 pick sketch to copy", "Sketcher CarbonCopy: hint"),
-                 {Gui::InputHint::UserInput::MouseLeft}}};
     }
 };
 

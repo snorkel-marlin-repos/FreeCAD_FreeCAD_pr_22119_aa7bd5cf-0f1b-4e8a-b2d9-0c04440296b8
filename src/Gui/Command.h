@@ -575,6 +575,11 @@ public:
     /// Obtain the current shortcut of this command
     virtual QString getShortcut() const;
 
+    /** @name arbitrary helper methods */
+    //@{
+    void adjustCameraPosition();
+    //@}
+
     /// Helper class to disable python console log
     class LogDisabler {
     public:

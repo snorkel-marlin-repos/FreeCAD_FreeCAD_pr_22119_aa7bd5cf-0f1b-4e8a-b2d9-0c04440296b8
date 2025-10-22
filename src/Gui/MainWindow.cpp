@@ -418,7 +418,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         notificationArea->setObjectName(QStringLiteral("notificationArea"));
         //: A context menu action used to show or hide the 'notificationArea' toolbar widget
         notificationArea->setWindowTitle(tr("Notification area"));
-        notificationArea->setStyleSheet(QStringLiteral("text-align:center;"));
+        notificationArea->setStyleSheet(QStringLiteral("text-align:left;"));
         statusBar()->addPermanentWidget(notificationArea);
     }
 
@@ -451,7 +451,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
             this, &MainWindow::onSetActiveSubWindow);
 #else
     connect(d->windowMapper, &QSignalMapper::mappedObject,
-            this, [=, this](QObject* object) {
+            this, [=](QObject* object) {
         onSetActiveSubWindow(qobject_cast<QWidget*>(object));
     });
 #endif

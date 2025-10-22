@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Initial temperature</string>
+      <string>Insert component's initial temperature:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

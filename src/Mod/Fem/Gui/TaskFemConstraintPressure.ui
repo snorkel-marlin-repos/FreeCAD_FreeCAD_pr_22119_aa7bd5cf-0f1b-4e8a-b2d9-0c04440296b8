@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="lbl_info">
      <property name="text">
-      <string>Click Add or Remove and select faces</string>
+      <string>Click Add or Remove and select face(s)</string>
      </property>
     </widget>
    </item>
@@ -84,7 +84,7 @@
    <item>
     <widget class="QCheckBox" name="checkBoxReverse">
      <property name="text">
-      <string>Reverse direction</string>
+      <string>Reverse Direction</string>
      </property>
     </widget>
    </item>

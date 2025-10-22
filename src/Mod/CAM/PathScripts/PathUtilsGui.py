@@ -63,38 +63,36 @@ class PathUtilsUserInput(object):
     def chooseJob(self, jobs):
         job = None
         selected = FreeCADGui.Selection.getSelection()
-        if 1 == len(selected):
-            found = PathUtils.findParentJob(selected[0])
-            if found:
-                return found
-
-        modelSelected = []
-        for job in jobs:
-            if all([o in job.Model.Group for o in selected]):
-                modelSelected.append(job)
-        if 1 == len(modelSelected):
-            job = modelSelected[0]
+        if 1 == len(selected) and selected[0] in jobs:
+            job = selected[0]
         else:
-            modelObjectSelected = []
+            modelSelected = []
             for job in jobs:
-                if all([o in job.Proxy.baseObjects(job) for o in selected]):
-                    modelObjectSelected.append(job)
-            if 1 == len(modelObjectSelected):
-                job = modelObjectSelected[0]
+                if all([o in job.Model.Group for o in selected]):
+                    modelSelected.append(job)
+            if 1 == len(modelSelected):
+                job = modelSelected[0]
             else:
-                if modelObjectSelected:
-                    mylist = [j.Label for j in modelObjectSelected]
+                modelObjectSelected = []
+                for job in jobs:
+                    if all([o in job.Proxy.baseObjects(job) for o in selected]):
+                        modelObjectSelected.append(job)
+                if 1 == len(modelObjectSelected):
+                    job = modelObjectSelected[0]
                 else:
-                    mylist = [j.Label for j in jobs]
+                    if modelObjectSelected:
+                        mylist = [j.Label for j in modelObjectSelected]
+                    else:
+                        mylist = [j.Label for j in jobs]
 
-                jobname, result = QtGui.QInputDialog.getItem(
-                    None, translate("Path", "Choose a CAM Job"), None, mylist
-                )
+                    jobname, result = QtGui.QInputDialog.getItem(
+                        None, translate("Path", "Choose a CAM Job"), None, mylist
+                    )
 
-                if result is False:
-                    return None
-                else:
-                    job = [j for j in jobs if j.Label == jobname][0]
+                    if result is False:
+                        return None
+                    else:
+                        job = [j for j in jobs if j.Label == jobname][0]
         return job
 
     def createJob(self):

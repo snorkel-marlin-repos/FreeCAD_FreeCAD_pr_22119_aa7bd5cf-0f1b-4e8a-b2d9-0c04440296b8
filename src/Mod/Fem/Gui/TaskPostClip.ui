@@ -70,14 +70,14 @@
      <item>
       <widget class="QCheckBox" name="InsideOut">
        <property name="text">
-        <string>Inside out</string>
+        <string>Inside Out</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="CutCells">
        <property name="text">
-        <string>Cut cells</string>
+        <string>Cut Cells</string>
        </property>
       </widget>
      </item>

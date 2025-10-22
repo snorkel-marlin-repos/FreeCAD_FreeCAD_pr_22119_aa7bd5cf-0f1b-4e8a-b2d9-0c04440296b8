@@ -226,7 +226,7 @@ bool removeRedundantPointOnObject(SketchObject* Obj, int GeoId1, int GeoId2, int
         // at this point it is already solved.
         tryAutoRecomputeIfNotSolve(Obj);
 
-        notifyConstraintSubstitutions(QObject::tr("One or two point-on-object constraints were deleted, "
+        notifyConstraintSubstitutions(QObject::tr("One or two point on object constraint(s) was/were deleted, "
                                                   "since the latest constraint being applied internally applies point-on-object as well."));
 
         // TODO: find way to get selection here, or clear elsewhere
@@ -758,7 +758,7 @@ void SketcherGui::notifyConstraintSubstitutions(const QString& message)
         QLatin1String("NotifyConstraintSubstitutions"),
         true,// Default ParamEntry
         true,// checkbox state
-        QObject::tr("Keep notifying about constraint substitutions"));
+        QObject::tr("Keep notifying me of constraint substitutions"));
 }
 
 // returns true if successful, false otherwise
@@ -772,7 +772,7 @@ bool addConstraintSafely(SketchObject* obj, std::function<void()> constraintaddi
         // Untranslated developer intended messages (i.e. to the Report View)
         // Example of exception carrying a static string with a pair in the "Notifications" context
         Gui::NotifyUserError(obj,
-                             QT_TRANSLATE_NOOP("Notifications", "Invalid constraint"),
+                             QT_TRANSLATE_NOOP("Notifications", "Invalid Constraint"),
                              e.what());
 
         Gui::Command::abortCommand();
@@ -784,7 +784,7 @@ bool addConstraintSafely(SketchObject* obj, std::function<void()> constraintaddi
         Gui::TranslatedUserError(
             obj,
             QObject::tr("Error"),
-            QObject::tr("Unexpected error. More information may be available in the report view."));
+            QObject::tr("Unexpected error. More information may be available in the Report View."));
 
         Gui::Command::abortCommand();
 
@@ -836,7 +836,7 @@ int SketchSelection::setUp()
     if (selection.size() == 1) {
         // if one selectetd, only sketch allowed. should be done by activity of command
         if (!selection[0].getObject()->isDerivedFrom<Sketcher::SketchObject>()) {
-            ErrorMsg = QObject::tr("Only the sketch and its support are allowed to be selected");
+            ErrorMsg = QObject::tr("Only sketch and its support are allowed to be selected.");
             return -1;
         }
 
@@ -847,7 +847,7 @@ int SketchSelection::setUp()
             SketchObj = static_cast<Sketcher::SketchObject*>(selection[0].getObject());
             // check if the none sketch object is the support of the sketch
             if (selection[1].getObject() != SketchObj->AttachmentSupport.getValue()) {
-                ErrorMsg = QObject::tr("Only the sketch and its support may be selected");
+                ErrorMsg = QObject::tr("Only sketch and its support are allowed to be selected.");
                 return -1;
             }
             // assume always a Part::Feature derived object as support
@@ -859,7 +859,7 @@ int SketchSelection::setUp()
             SketchObj = static_cast<Sketcher::SketchObject*>(selection[1].getObject());
             // check if the none sketch object is the support of the sketch
             if (selection[0].getObject() != SketchObj->AttachmentSupport.getValue()) {
-                ErrorMsg = QObject::tr("Only the sketch and its support  may be selected");
+                ErrorMsg = QObject::tr("Only sketch and its support are allowed to be selected.");
                 return -1;
             }
             // assume always a Part::Feature derived object as support
@@ -892,12 +892,12 @@ enum SelType
 {
     SelUnknown = 0,
     SelVertex = 1,
+    SelVertexOrRoot = 64,
     SelRoot = 2,
-    SelVertexOrRoot = SelVertex | SelRoot,
     SelEdge = 4,
+    SelEdgeOrAxis = 128,
     SelHAxis = 8,
     SelVAxis = 16,
-    SelEdgeOrAxis = SelEdge | SelHAxis | SelVAxis,
     SelExternalEdge = 32
 };
 
@@ -928,11 +928,11 @@ public:
             return false;
         }
         std::string element(sSubName);
-        if ((allowedSelTypes & SelRoot && element.substr(0, 9) == "RootPoint")
-            || (allowedSelTypes & SelVertex && element.substr(0, 6) == "Vertex")
-            || (allowedSelTypes & SelEdge && element.substr(0, 4) == "Edge")
-            || (allowedSelTypes & SelHAxis && element.substr(0, 6) == "H_Axis")
-            || (allowedSelTypes & SelVAxis && element.substr(0, 6) == "V_Axis")
+        if ((allowedSelTypes & (SelRoot | SelVertexOrRoot) && element.substr(0, 9) == "RootPoint")
+            || (allowedSelTypes & (SelVertex | SelVertexOrRoot) && element.substr(0, 6) == "Vertex")
+            || (allowedSelTypes & (SelEdge | SelEdgeOrAxis) && element.substr(0, 4) == "Edge")
+            || (allowedSelTypes & (SelHAxis | SelEdgeOrAxis) && element.substr(0, 6) == "H_Axis")
+            || (allowedSelTypes & (SelVAxis | SelEdgeOrAxis) && element.substr(0, 6) == "V_Axis")
             || (allowedSelTypes & SelExternalEdge && element.substr(0, 12) == "ExternalEdge")) {
             return true;
         }
@@ -982,6 +982,10 @@ protected:
      * generate sequences to be passed to applyConstraint().
      * Whenever any sequence is completed, applyConstraint() is called, so it's
      * best to keep them prefix-free.
+     * Be mindful that when SelVertex and SelRoot are given preference over
+     * SelVertexOrRoot, and similar for edges/axes. Thus if a vertex is selected
+     * when SelVertex and SelVertexOrRoot are both applicable, only sequences with
+     * SelVertex will be continue.
      *
      * TODO: Introduce structs to allow keeping first selection
      */
@@ -1028,30 +1032,30 @@ public:
         int VtId = getPreselectPoint();
         int CrvId = getPreselectCurve();
         int CrsId = getPreselectCross();
-        if (allowedSelTypes & SelRoot && CrsId == 0) {
+        if (allowedSelTypes & (SelRoot | SelVertexOrRoot) && CrsId == 0) {
             selIdPair.GeoId = Sketcher::GeoEnum::RtPnt;
             selIdPair.PosId = Sketcher::PointPos::start;
-            newSelType = SelRoot;
+            newSelType = (allowedSelTypes & SelRoot) ? SelRoot : SelVertexOrRoot;
             ss << "RootPoint";
         }
-        else if (allowedSelTypes & SelVertex && VtId >= 0) {
+        else if (allowedSelTypes & (SelVertex | SelVertexOrRoot) && VtId >= 0) {
             sketchgui->getSketchObject()->getGeoVertexIndex(VtId, selIdPair.GeoId, selIdPair.PosId);
-            newSelType = SelVertex;
+            newSelType = (allowedSelTypes & SelVertex) ? SelVertex : SelVertexOrRoot;
             ss << "Vertex" << VtId + 1;
         }
-        else if (allowedSelTypes & SelEdge && CrvId >= 0) {
+        else if (allowedSelTypes & (SelEdge | SelEdgeOrAxis) && CrvId >= 0) {
             selIdPair.GeoId = CrvId;
-            newSelType = SelEdge;
+            newSelType = (allowedSelTypes & SelEdge) ? SelEdge : SelEdgeOrAxis;
             ss << "Edge" << CrvId + 1;
         }
-        else if (allowedSelTypes & SelHAxis && CrsId == 1) {
+        else if (allowedSelTypes & (SelHAxis | SelEdgeOrAxis) && CrsId == 1) {
             selIdPair.GeoId = Sketcher::GeoEnum::HAxis;
-            newSelType = SelHAxis;
+            newSelType = (allowedSelTypes & SelHAxis) ? SelHAxis : SelEdgeOrAxis;
             ss << "H_Axis";
         }
-        else if (allowedSelTypes & SelVAxis && CrsId == 2) {
+        else if (allowedSelTypes & (SelVAxis | SelEdgeOrAxis) && CrsId == 2) {
             selIdPair.GeoId = Sketcher::GeoEnum::VAxis;
-            newSelType = SelVAxis;
+            newSelType = (allowedSelTypes & SelVAxis) ? SelVAxis : SelEdgeOrAxis;
             ss << "V_Axis";
         }
         else if (allowedSelTypes & SelExternalEdge && CrvId <= Sketcher::GeoEnum::RefExt) {
@@ -1081,16 +1085,13 @@ public:
             for (std::set<int>::iterator token = ongoingSequences.begin();
                  token != ongoingSequences.end();
                  ++token) {
-                if ((cmd->allowedSelSequences).at(*token).at(seqIndex) & newSelType) {
+                if ((cmd->allowedSelSequences).at(*token).at(seqIndex) == newSelType) {
                     if (seqIndex == (cmd->allowedSelSequences).at(*token).size() - 1) {
                         // One of the sequences is completed. Pass to cmd->applyConstraint
                         cmd->applyConstraint(selSeq, *token);// replace arg 2 by ongoingToken
 
                         selSeq.clear();
                         resetOngoingSequences();
-
-                        // Re-arm hint for next operation
-                        updateHint();
 
                         return true;
                     }
@@ -1105,211 +1106,11 @@ public:
             seqIndex++;
             selFilterGate->setAllowedSelTypes(allowedSelTypes);
         }
-        updateHint();
 
         return true;
     }
 
-    std::list<Gui::InputHint> getToolHints() const override {
-    const std::string commandName = cmd->getName();
-    const int selectionStep = seqIndex;
-
-    // Special case for Sketcher_ConstrainPointOnObject to generate dynamic step hint
-    if (commandName == "Sketcher_ConstrainPointOnObject") {
-        if (selectionStep == 0) {
-            return {{QObject::tr("%1 pick point or edge"), {Gui::InputHint::UserInput::MouseLeft}}};
-        } else if (selectionStep == 1 && !selSeq.empty()) {
-            if (isVertex(selSeq[0].GeoId, selSeq[0].PosId)) {
-                return {{QObject::tr("%1 pick edge"), {Gui::InputHint::UserInput::MouseLeft}}};
-            } else {
-                return {{QObject::tr("%1 pick point"), {Gui::InputHint::UserInput::MouseLeft}}};
-            }
-        }
-    }
-
-    // For everything else, use the static table
-    return lookupConstraintHints(commandName, selectionStep);
-}
-
 private:
-    struct ConstraintHintEntry {
-        std::string commandName;    // FreeCAD command name (e.g., "Sketcher_ConstrainSymmetric")
-        int selectionStep;          // 0-indexed step in the selection sequence
-        std::list<Gui::InputHint> hints;  // Hint text and input types for this step
-    };
-
-    using ConstraintHintTable = std::vector<ConstraintHintEntry>;
-
-    // Constraint hint lookup table
-    // Format: {command_name, selection_step, {hint_text, input_types}}
-    // Steps are 0-indexed and correspond to DrawSketchHandlerGenConstraint::seqIndex
-    // Each step provides contextual guidance for what the user should select next
-    static ConstraintHintTable getConstraintHintTable() {
-        return {
-            // Coincident
-            {.commandName = "Sketcher_ConstrainCoincidentUnified",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainCoincidentUnified",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Distance X/Y
-            {.commandName = "Sketcher_ConstrainDistanceX",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainDistanceX",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainDistanceY",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainDistanceY",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Horizontal/Vertical
-            {.commandName = "Sketcher_ConstrainHorizontal",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick edge or first point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainHorizontal",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainVertical",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick edge or first point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainVertical",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainHorVer",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick edge or first point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainHorVer",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Block/Lock
-            {.commandName = "Sketcher_ConstrainBlock",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick edge to block"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainLock",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick point to lock"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Coincident (individual)
-            {.commandName = "Sketcher_ConstrainCoincident",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick point or curve"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainCoincident",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point or curve"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainEqual",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainEqual",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Radius/Diameter
-            {.commandName = "Sketcher_ConstrainRadius",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick circle or arc"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainDiameter",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick circle or arc"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Angle
-            {.commandName = "Sketcher_ConstrainAngle",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick line"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainAngle",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second line"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Symmetry
-            {.commandName = "Sketcher_ConstrainSymmetric",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainSymmetric",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainSymmetric",
-            .selectionStep = 2,
-            .hints = {{QObject::tr("%1 pick symmetry line"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Tangent
-            {.commandName = "Sketcher_ConstrainTangent",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainTangent",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainTangent",
-            .selectionStep = 2,
-            .hints = {{QObject::tr("%1 pick optional tangent point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Perpendicular
-            {.commandName = "Sketcher_ConstrainPerpendicular",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainPerpendicular",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainPerpendicular",
-            .selectionStep = 2,
-            .hints = {{QObject::tr("%1 pick optional perpendicular point"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Parallel
-            {.commandName = "Sketcher_ConstrainParallel",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick line"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainParallel",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second line"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            // Distance
-            {.commandName = "Sketcher_ConstrainDistance",
-            .selectionStep = 0,
-            .hints = {{QObject::tr("%1 pick point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-
-            {.commandName = "Sketcher_ConstrainDistance",
-            .selectionStep = 1,
-            .hints = {{QObject::tr("%1 pick second point or edge"), {Gui::InputHint::UserInput::MouseLeft}}}},
-        };
-    }
-
-    static std::list<Gui::InputHint> lookupConstraintHints(const std::string& commandName, int selectionStep) {
-        const auto constraintHintTable = getConstraintHintTable();
-        auto it = std::ranges::find_if(constraintHintTable,
-                                [&commandName, selectionStep](const ConstraintHintEntry& entry) {
-                                    return entry.commandName == commandName && entry.selectionStep == selectionStep;
-                                });
-
-        return (it != constraintHintTable.end()) ? it->hints : std::list<Gui::InputHint>{};
-    }
-
     void activated() override
     {
         selFilterGate = new GenericConstraintSelection(sketchgui->getObject());
@@ -1402,7 +1203,7 @@ public:
         sAppModule = "Sketcher";
         sGroup = "Sketcher";
         sMenuText = QT_TR_NOOP("Dimension");
-        sToolTipText = QT_TR_NOOP("Dimension tools");
+        sToolTipText = QT_TR_NOOP("Dimension tools.");
         sWhatsThis = "Sketcher_CompDimensionTools";
         sStatusTip = sToolTipText;
         eType = ForEdit;
@@ -1475,7 +1276,7 @@ public:
         sAppModule = "Sketcher";
         sGroup = "Sketcher";
         sMenuText = QT_TR_NOOP("Constrain");
-        sToolTipText = QT_TR_NOOP("Constrain tools");
+        sToolTipText = QT_TR_NOOP("Constrain tools.");
         sWhatsThis = "Sketcher_CompConstrainTools";
         sStatusTip = sToolTipText;
         eType = ForEdit;
@@ -1505,8 +1306,8 @@ public:
     {
         sAppModule = "Sketcher";
         sGroup = "Sketcher";
-        sMenuText = QT_TR_NOOP("Toggle Constraints");
-        sToolTipText = QT_TR_NOOP("Toggle constrain tools");
+        sMenuText = QT_TR_NOOP("Toggle constraints");
+        sToolTipText = QT_TR_NOOP("Toggle constrain tools.");
         sWhatsThis = "Sketcher_CompToggleConstraints";
         sStatusTip = sToolTipText;
         eType = ForEdit;
@@ -1805,8 +1606,6 @@ public:
                 ss.str().c_str());
             sketchgui->draw(false, false); // Redraw
         }
-
-        updateHint();
         return true;
     }
 
@@ -1821,17 +1620,6 @@ public:
             DrawSketchHandler::quit();
         }
     }
-
-std::list<Gui::InputHint> getToolHints() const override {
-    if (selectionEmpty()) {
-        return {{QObject::tr("%1 pick geometry"), {Gui::InputHint::UserInput::MouseLeft}}};
-    } else if (selPoints.size() == 1 && selLine.empty() && selCircleArc.empty()) {
-        return {{QObject::tr("%1 pick second point or geometry"), {Gui::InputHint::UserInput::MouseLeft}}};
-    } else {
-        return {{QObject::tr("%1 place dimension"), {Gui::InputHint::UserInput::MouseLeft}}};
-    }
-}
-
 protected:
     SpecialConstraint specialConstraint;
     AvailableConstraint availableConstraint;
@@ -1975,7 +1763,7 @@ protected:
             && !contains(selEllipseAndCo, elem);
     }
 
-    bool selectionEmpty() const
+    bool selectionEmpty()
     {
         return selPoints.empty() && selLine.empty() && selCircleArc.empty() && selEllipseAndCo.empty();
     }
@@ -2295,23 +2083,23 @@ protected:
                 createArcLengthConstrain(geoId, onSketchPos);
             }
             if (availableConstraint == AvailableConstraint::THIRD) {
-                restartCommand(QT_TRANSLATE_NOOP("Command", "Add radius constraint"));
+                restartCommand(QT_TRANSLATE_NOOP("Command", "Add Radius constraint"));
                 createRadiusDiameterConstrain(geoId, onSketchPos, true);
             }
             if (availableConstraint == AvailableConstraint::FOURTH) {
-                restartCommand(QT_TRANSLATE_NOOP("Command", "Add radius constraint"));
+                restartCommand(QT_TRANSLATE_NOOP("Command", "Add Radius constraint"));
                 createRadiusDiameterConstrain(geoId, onSketchPos, false);
                 availableConstraint = AvailableConstraint::RESET;
             }
         }
         else {
             if (availableConstraint == AvailableConstraint::FIRST) {
-                restartCommand(QT_TRANSLATE_NOOP("Command", "Add radius constraint"));
+                restartCommand(QT_TRANSLATE_NOOP("Command", "Add Radius constraint"));
                 createRadiusDiameterConstrain(geoId, onSketchPos, true);
                 selAllowed = true;
             }
             if (availableConstraint == AvailableConstraint::SECOND) {
-                restartCommand(QT_TRANSLATE_NOOP("Command", "Add radius constraint"));
+                restartCommand(QT_TRANSLATE_NOOP("Command", "Add Radius constraint"));
                 createRadiusDiameterConstrain(geoId, onSketchPos, false);
                 if (!isArcOfCircle(*Obj->getGeometry(geoId))) {
                     //This way if key is pressed again it goes back to FIRST
@@ -2475,10 +2263,10 @@ protected:
                 Base::Vector3d pnt1 = lineSeg->getStartPoint();
                 Base::Vector3d pnt2 = lineSeg->getEndPoint();
                 Base::Vector3d d = pnt2 - pnt1;
-                double ActDist = std::abs(
-                            std::abs(-center1.x * d.y + center1.y * d.x + pnt1.x * pnt2.y - pnt2.x * pnt1.y)
-                            / d.Length()
-                            - radius1);
+                double ActDist =
+                    std::abs(-center1.x * d.y + center1.y * d.x + pnt1.x * pnt2.y - pnt2.x * pnt1.y)
+                        / d.Length()
+                    - radius1;
 
                 Gui::cmdAppObjectArgs(Obj,
                                       "addConstraint(Sketcher.Constraint('Distance',%d,%d,%f))",
@@ -2984,7 +2772,9 @@ CmdSketcherDimension::CmdSketcherDimension()
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
     sMenuText = QT_TR_NOOP("Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains contextually based on the selection. The type can be changed with the M key.");
+    sToolTipText = QT_TR_NOOP("Constrain contextually based on your selection.\n"
+        "Depending on your selection you might have several constraints available. You can cycle through them using M key.\n"
+        "Left clicking on empty space will validate the current constraint. Right clicking or pressing Esc will cancel.");
     sWhatsThis = "Sketcher_Dimension";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Dimension";
@@ -3038,8 +2828,8 @@ public:
     {
         sAppModule = "Sketcher";
         sGroup = "Sketcher";
-        sMenuText = QT_TR_NOOP("Horizontal/Vertical Constraint");
-        sToolTipText = QT_TR_NOOP("Constrains the selected elements either horizontally or vertically");
+        sMenuText = QT_TR_NOOP("Constrain horizontal/vertical");
+        sToolTipText = QT_TR_NOOP("Constrains a single line to either horizontal or vertical.");
         sWhatsThis = "Sketcher_CompHorVer";
         sStatusTip = sToolTipText;
         eType = ForEdit;
@@ -3092,7 +2882,7 @@ bool canHorVerBlock(Sketcher::SketchObject* Obj, int geoId)
             Gui::TranslatedUserWarning(
                 Obj,
                 QObject::tr("Impossible constraint"),
-                QObject::tr("The selected edge already has a block constraint!"));
+                QObject::tr("The selected edge already has a Block constraint!"));
             return false;
         }
     }
@@ -3168,7 +2958,7 @@ void horVerActivated(CmdSketcherConstraint* cmd, std::string type)
         Gui::TranslatedUserWarning(
             Obj,
             QObject::tr("Impossible constraint"),
-            QObject::tr("The selected items cannot be constrained horizontally or vertically!"));
+            QObject::tr("The selected item(s) can't accept a horizontal or vertical constraint!"));
         return;
     }
 
@@ -3356,15 +3146,15 @@ CmdSketcherConstrainHorVer::CmdSketcherConstrainHorVer()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Horizontal/Vertical Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements either horizontally or vertically, based on their closest alignment");
+    sMenuText = QT_TR_NOOP("Constrain horizontal/vertical");
+    sToolTipText = QT_TR_NOOP("Constrains a single line to either horizontal or vertical, whichever is closer to current alignment.");
     sWhatsThis = "Sketcher_ConstrainHorVer";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_HorVer";
     sAccel = "A";
     eType = ForEdit;
 
-    allowedSelSequences = { {SelEdge}, {SelVertexOrRoot, SelVertexOrRoot} };
+    allowedSelSequences = { {SelEdge}, {SelVertex, SelVertexOrRoot}, {SelRoot, SelVertex} };
 }
 
 void CmdSketcherConstrainHorVer::activated(int iMsg)
@@ -3402,15 +3192,15 @@ CmdSketcherConstrainHorizontal::CmdSketcherConstrainHorizontal()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Horizontal Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements horizontally");
+    sMenuText = QT_TR_NOOP("Constrain horizontal");
+    sToolTipText = QT_TR_NOOP("Create a horizontal constraint on the selected item");
     sWhatsThis = "Sketcher_ConstrainHorizontal";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Horizontal";
     sAccel = "H";
     eType = ForEdit;
 
-    allowedSelSequences = {{SelEdge}, {SelVertexOrRoot, SelVertexOrRoot}};
+    allowedSelSequences = {{SelEdge}, {SelVertex, SelVertexOrRoot}, {SelRoot, SelVertex}};
 }
 
 void CmdSketcherConstrainHorizontal::activated(int iMsg)
@@ -3447,15 +3237,15 @@ CmdSketcherConstrainVertical::CmdSketcherConstrainVertical()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Vertical Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements vertically");
+    sMenuText = QT_TR_NOOP("Constrain vertical");
+    sToolTipText = QT_TR_NOOP("Create a vertical constraint on the selected item");
     sWhatsThis = "Sketcher_ConstrainVertical";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Vertical";
     sAccel = "V";
     eType = ForEdit;
 
-    allowedSelSequences = {{SelEdge}, {SelVertexOrRoot, SelVertexOrRoot}};
+    allowedSelSequences = {{SelEdge}, {SelVertex, SelVertexOrRoot}, {SelRoot, SelVertex}};
 }
 
 void CmdSketcherConstrainVertical::activated(int iMsg)
@@ -3493,8 +3283,10 @@ CmdSketcherConstrainLock::CmdSketcherConstrainLock()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Lock Position");
-    sToolTipText = QT_TR_NOOP("Constrains the selected vertices by adding horizontal and vertical distance constraints");
+    sMenuText = QT_TR_NOOP("Constrain lock");
+    sToolTipText = QT_TR_NOOP("Create both a horizontal "
+                              "and a vertical distance constraint\n"
+                              "on the selected vertex");
     sWhatsThis = "Sketcher_ConstrainLock";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Lock";
@@ -3778,8 +3570,8 @@ CmdSketcherConstrainBlock::CmdSketcherConstrainBlock()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Block Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected edges as fixed");
+    sMenuText = QT_TR_NOOP("Constrain block");
+    sToolTipText = QT_TR_NOOP("Block the selected edge from moving");
     sWhatsThis = "Sketcher_ConstrainBlock";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Block";
@@ -3824,7 +3616,7 @@ void CmdSketcherConstrainBlock::activated(int iMsg)
         || Obj->getLastHasRedundancies()) {
         Gui::TranslatedUserWarning(Obj,
                                    QObject::tr("Wrong solver status"),
-                                   QObject::tr("A block constraint cannot be added "
+                                   QObject::tr("A Block constraint cannot be added "
                                                "if the sketch is unsolved "
                                                "or there are redundant and "
                                                "conflicting constraints."));
@@ -3860,7 +3652,7 @@ void CmdSketcherConstrainBlock::activated(int iMsg)
             Gui::TranslatedUserWarning(
                 Obj,
                 QObject::tr("Double constraint"),
-                QObject::tr("The selected edge already has a block constraint!"));
+                QObject::tr("The selected edge already has a Block constraint!"));
             return;
         }
 
@@ -3913,7 +3705,7 @@ void CmdSketcherConstrainBlock::applyConstraint(std::vector<SelIdPair>& selSeq, 
                 Gui::TranslatedUserWarning(
                     Obj,
                     QObject::tr("Double constraint"),
-                    QObject::tr("The selected edge already has a block constraint!"));
+                    QObject::tr("The selected edge already has a Block constraint!"));
                 return;
             }
 
@@ -3978,8 +3770,9 @@ CmdSketcherConstrainCoincidentUnified::CmdSketcherConstrainCoincidentUnified(con
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Coincident Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements to be coincident");
+    sMenuText = QT_TR_NOOP("Constrain coincident");
+    sToolTipText = QT_TR_NOOP("Create a coincident constraint between points, or fix a point on an edge, "
+        "or a concentric constraint between circles, arcs, and ellipses");
     sWhatsThis = "Sketcher_ConstrainCoincidentUnified";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Coincident";
@@ -3990,14 +3783,15 @@ CmdSketcherConstrainCoincidentUnified::CmdSketcherConstrainCoincidentUnified(con
 
     eType = ForEdit;
 
-    allowedSelSequences = {{SelVertex, SelEdgeOrAxis},
+    allowedSelSequences = { {SelVertex, SelEdgeOrAxis},
                            {SelRoot, SelEdge},
                            {SelVertex, SelExternalEdge},
                            {SelEdge, SelVertexOrRoot},
                            {SelEdgeOrAxis, SelVertex},
                            {SelExternalEdge, SelVertex},
 
-                           {SelVertexOrRoot, SelVertexOrRoot},
+                           {SelVertex, SelVertexOrRoot},
+                           {SelRoot, SelVertex},
                            {SelEdge, SelEdge},
                            {SelEdge, SelExternalEdge},
                            {SelExternalEdge, SelEdge} };
@@ -4318,10 +4112,11 @@ void CmdSketcherConstrainCoincidentUnified::applyConstraint(std::vector<SelIdPai
     case 5:// {SelExternalEdge, SelVertex}
         applyConstraintPointOnObject(selSeq, seqIndex);
         break;
-    case 6:// {SelVertexOrRoot, SelVertexOrRoot}
-    case 7:// {SelEdge, SelEdge}
-    case 8:// {SelEdge, SelExternalEdge}
-    case 9:// {SelExternalEdge, SelEdge}
+    case 6:// {SelVertex, SelVertexOrRoot}
+    case 7:// {SelRoot, SelVertex}
+    case 8:// {SelEdge, SelEdge}
+    case 9:// {SelEdge, SelExternalEdge}
+    case 10:// {SelExternalEdge, SelEdge}
         seqIndex -= 6;
         applyConstraintCoincident(selSeq, seqIndex);
         break;
@@ -4416,12 +4211,13 @@ void CmdSketcherConstrainCoincidentUnified::applyConstraintCoincident(std::vecto
     Sketcher::PointPos PosId1 = selSeq.at(0).PosId, PosId2 = selSeq.at(1).PosId;
 
     switch (seqIndex) {
-    case 0:// {SelVertexOrRoot, SelVertexOrRoot}
+    case 0:// {SelVertex, SelVertexOrRoot}
+    case 1:// {SelRoot, SelVertex}
         // Nothing specific.
         break;
-    case 1:// {SelEdge, SelEdge}
-    case 2:// {SelEdge, SelExternalEdge}
-    case 3:// {SelExternalEdge, SelEdge}
+    case 2:// {SelEdge, SelEdge}
+    case 3:// {SelEdge, SelExternalEdge}
+    case 4:// {SelExternalEdge, SelEdge}
         // Concentric for circles, ellipse, arc, arcofEllipse only.
         if (!isGeoConcentricCompatible(Obj->getGeometry(GeoId1))
             || !isGeoConcentricCompatible(Obj->getGeometry(GeoId2))) {
@@ -4490,8 +4286,9 @@ CmdSketcherConstrainCoincident::CmdSketcherConstrainCoincident()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Coincident Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements to be coincident");
+    sMenuText = QT_TR_NOOP("Constrain coincident");
+    sToolTipText = QT_TR_NOOP("Create a coincident constraint between points, or a concentric "
+                              "constraint between circles, arcs, and ellipses");
     sWhatsThis = "Sketcher_ConstrainCoincident";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_PointOnPoint";
@@ -4500,7 +4297,8 @@ CmdSketcherConstrainCoincident::CmdSketcherConstrainCoincident()
     sAccel = hGrp->GetBool("UnifiedCoincident", true) ? "C,C" : "C";
     eType = ForEdit;
 
-    allowedSelSequences = {{SelVertexOrRoot, SelVertexOrRoot},
+    allowedSelSequences = {{SelVertex, SelVertexOrRoot},
+                           {SelRoot, SelVertex},
                            {SelEdge, SelEdge},
                            {SelEdge, SelExternalEdge},
                            {SelExternalEdge, SelEdge}};
@@ -4540,8 +4338,8 @@ CmdSketcherConstrainPointOnObject::CmdSketcherConstrainPointOnObject()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Point-On-Object Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected point onto the selected object");
+    sMenuText = QT_TR_NOOP("Constrain point on object");
+    sToolTipText = QT_TR_NOOP("Fix a point onto an object");
     sWhatsThis = "Sketcher_ConstrainPointOnObject";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_PointOnObject";
@@ -4592,21 +4390,24 @@ CmdSketcherConstrainDistance::CmdSketcherConstrainDistance()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Distance Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the vertical distance between two points, or from a point to the origin if one is selected");
+    sMenuText = QT_TR_NOOP("Constrain distance");
+    sToolTipText = QT_TR_NOOP("Fix a length of a line or the distance between a line and a vertex "
+        "or between two circles");
     sWhatsThis = "Sketcher_ConstrainDistance";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Length";
     sAccel = "K, D";
     eType = ForEdit;
 
-    allowedSelSequences = {{SelVertexOrRoot, SelVertexOrRoot},
+    allowedSelSequences = { {SelVertex, SelVertexOrRoot},
+                           {SelRoot, SelVertex},
                            {SelEdge},
                            {SelExternalEdge},
                            {SelVertex, SelEdgeOrAxis},
                            {SelRoot, SelEdge},
-                           {SelVertexOrRoot, SelExternalEdge},
-                           {SelEdge, SelEdge}};
+                           {SelVertex, SelExternalEdge},
+                           {SelRoot, SelExternalEdge},
+                           {SelEdge, SelEdge} };
 }
 
 void CmdSketcherConstrainDistance::activated(int iMsg)
@@ -4739,7 +4540,7 @@ void CmdSketcherConstrainDistance::activated(int iMsg)
                 std::abs(-pnt.x * d.y + pnt.y * d.x + pnt1.x * pnt2.y - pnt2.x * pnt1.y)
                 / d.Length();
 
-            openCommand(QT_TRANSLATE_NOOP("Command", "Add point to line distance constraint"));
+            openCommand(QT_TRANSLATE_NOOP("Command", "Add point to line Distance constraint"));
             Gui::cmdAppObjectArgs(selection[0].getObject(),
                 "addConstraint(Sketcher.Constraint('Distance',%d,%d,%d,%f))",
                 GeoId1,
@@ -4769,7 +4570,7 @@ void CmdSketcherConstrainDistance::activated(int iMsg)
             Base::Vector3d d = center - pnt;
             double ActDist = std::abs(d.Length() - radius);
 
-            openCommand(QT_TRANSLATE_NOOP("Command", "Add point to circle distance constraint"));
+            openCommand(QT_TRANSLATE_NOOP("Command", "Add point to circle Distance constraint"));
             Gui::cmdAppObjectArgs(selection[0].getObject(),
                 "addConstraint(Sketcher.Constraint('Distance',%d,%d,%d,%f))",
                 GeoId1,
@@ -4982,7 +4783,8 @@ void CmdSketcherConstrainDistance::applyConstraint(std::vector<SelIdPair>& selSe
     bool arebothpointsorsegmentsfixed = areBothPointsOrSegmentsFixed(Obj, GeoId1, GeoId2);
 
     switch (seqIndex) {
-    case 0:// {SelVertexOrRoot, SelVertexOrRoot}
+    case 0:// {SelVertex, SelVertexOrRoot}
+    case 1:// {SelRoot, SelVertex}
     {
         GeoId1 = selSeq.at(0).GeoId;
         GeoId2 = selSeq.at(1).GeoId;
@@ -5046,8 +4848,8 @@ void CmdSketcherConstrainDistance::applyConstraint(std::vector<SelIdPair>& selSe
 
         return;
     }
-    case 1:// {SelEdge}
-    case 2:// {SelExternalEdge}
+    case 2:// {SelEdge}
+    case 3:// {SelExternalEdge}
     {
         GeoId1 = selSeq.at(0).GeoId;
 
@@ -5089,9 +4891,10 @@ void CmdSketcherConstrainDistance::applyConstraint(std::vector<SelIdPair>& selSe
 
         return;
     }
-    case 3:// {SelVertex, SelEdgeOrAxis}
-    case 4:// {SelRoot, SelEdge}
-    case 5:// {SelVertexOrRoot, SelExternalEdge}
+    case 4:// {SelVertex, SelEdgeOrAxis}
+    case 5:// {SelRoot, SelEdge}
+    case 6:// {SelVertex, SelExternalEdge}
+    case 7:// {SelRoot, SelExternalEdge}
     {
         GeoId1 = selSeq.at(0).GeoId;
         GeoId2 = selSeq.at(1).GeoId;
@@ -5109,7 +4912,7 @@ void CmdSketcherConstrainDistance::applyConstraint(std::vector<SelIdPair>& selSe
                 std::abs(-pnt.x * d.y + pnt.y * d.x + pnt1.x * pnt2.y - pnt2.x * pnt1.y)
                 / d.Length();
 
-            openCommand(QT_TRANSLATE_NOOP("Command", "Add point to line distance constraint"));
+            openCommand(QT_TRANSLATE_NOOP("Command", "Add point to line Distance constraint"));
             Gui::cmdAppObjectArgs(Obj,
                 "addConstraint(Sketcher.Constraint('Distance',%d,%d,%d,%f))",
                 GeoId1,
@@ -5131,7 +4934,7 @@ void CmdSketcherConstrainDistance::applyConstraint(std::vector<SelIdPair>& selSe
 
         return;
     }
-    case 6:// {SelEdge, SelEdge}
+    case 8:// {SelEdge, SelEdge}
     {
         GeoId1 = selSeq.at(0).GeoId;
         GeoId2 = selSeq.at(1).GeoId;
@@ -5239,8 +5042,9 @@ CmdSketcherConstrainDistanceX::CmdSketcherConstrainDistanceX()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Horizontal Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the horizontal distance between two points, or from a point to the origin if one is selected");
+    sMenuText = QT_TR_NOOP("Constrain horizontal distance");
+    sToolTipText = QT_TR_NOOP("Fix the horizontal distance "
+                              "between two points or line ends");
     sWhatsThis = "Sketcher_ConstrainDistanceX";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_HorizontalDistance";
@@ -5248,7 +5052,8 @@ CmdSketcherConstrainDistanceX::CmdSketcherConstrainDistanceX()
     eType = ForEdit;
 
     // Can't do single vertex because its a prefix for 2 vertices
-    allowedSelSequences = {{SelVertexOrRoot, SelVertexOrRoot},
+    allowedSelSequences = {{SelVertex, SelVertexOrRoot},
+                           {SelRoot, SelVertex},
                            {SelEdge},
                            {SelExternalEdge}};
 }
@@ -5432,7 +5237,8 @@ void CmdSketcherConstrainDistanceX::applyConstraint(std::vector<SelIdPair>& selS
     Sketcher::PointPos PosId1 = Sketcher::PointPos::none, PosId2 = Sketcher::PointPos::none;
 
     switch (seqIndex) {
-        case 0:// {SelVertexOrRoot, SelVertexOrRoot}
+        case 0:// {SelVertex, SelVertexOrRoot}
+        case 1:// {SelRoot, SelVertex}
         {
             GeoId1 = selSeq.at(0).GeoId;
             GeoId2 = selSeq.at(1).GeoId;
@@ -5440,8 +5246,8 @@ void CmdSketcherConstrainDistanceX::applyConstraint(std::vector<SelIdPair>& selS
             PosId2 = selSeq.at(1).PosId;
             break;
         }
-        case 1:// {SelEdge}
-        case 2:// {SelExternalEdge}
+        case 2:// {SelEdge}
+        case 3:// {SelExternalEdge}
         {
             GeoId1 = GeoId2 = selSeq.at(0).GeoId;
             PosId1 = Sketcher::PointPos::start;
@@ -5540,8 +5346,8 @@ CmdSketcherConstrainDistanceY::CmdSketcherConstrainDistanceY()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Vertical Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the vertical distance between the selected elements");
+    sMenuText = QT_TR_NOOP("Constrain vertical distance");
+    sToolTipText = QT_TR_NOOP("Fix the vertical distance between two points or line ends");
     sWhatsThis = "Sketcher_ConstrainDistanceY";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_VerticalDistance";
@@ -5549,7 +5355,8 @@ CmdSketcherConstrainDistanceY::CmdSketcherConstrainDistanceY()
     eType = ForEdit;
 
     // Can't do single vertex because its a prefix for 2 vertices
-    allowedSelSequences = {{SelVertexOrRoot, SelVertexOrRoot},
+    allowedSelSequences = {{SelVertex, SelVertexOrRoot},
+                           {SelRoot, SelVertex},
                            {SelEdge},
                            {SelExternalEdge}};
 }
@@ -5729,7 +5536,8 @@ void CmdSketcherConstrainDistanceY::applyConstraint(std::vector<SelIdPair>& selS
     Sketcher::PointPos PosId1 = Sketcher::PointPos::none, PosId2 = Sketcher::PointPos::none;
 
     switch (seqIndex) {
-        case 0:// {SelVertexOrRoot, SelVertexOrRoot}
+        case 0:// {SelVertex, SelVertexOrRoot}
+        case 1:// {SelRoot, SelVertex}
         {
             GeoId1 = selSeq.at(0).GeoId;
             GeoId2 = selSeq.at(1).GeoId;
@@ -5737,8 +5545,8 @@ void CmdSketcherConstrainDistanceY::applyConstraint(std::vector<SelIdPair>& selS
             PosId2 = selSeq.at(1).PosId;
             break;
         }
-        case 1:// {SelEdge}
-        case 2:// {SelExternalEdge}
+        case 2:// {SelEdge}
+        case 3:// {SelExternalEdge}
         {
             GeoId1 = GeoId2 = selSeq.at(0).GeoId;
             PosId1 = Sketcher::PointPos::start;
@@ -5836,8 +5644,8 @@ CmdSketcherConstrainParallel::CmdSketcherConstrainParallel()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Parallel Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected lines to be parallel");
+    sMenuText = QT_TR_NOOP("Constrain parallel");
+    sToolTipText = QT_TR_NOOP("Create a parallel constraint between two lines");
     sWhatsThis = "Sketcher_ConstrainParallel";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Parallel";
@@ -5999,8 +5807,8 @@ CmdSketcherConstrainPerpendicular::CmdSketcherConstrainPerpendicular()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Perpendicular Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected lines to be perpendicular");
+    sMenuText = QT_TR_NOOP("Constrain perpendicular");
+    sToolTipText = QT_TR_NOOP("Create a perpendicular constraint between two lines");
     sWhatsThis = "Sketcher_ConstrainPerpendicular";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Perpendicular";
@@ -6764,8 +6572,8 @@ CmdSketcherConstrainTangent::CmdSketcherConstrainTangent()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Tangent/Collinear Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements to be tangent or collinear");
+    sMenuText = QT_TR_NOOP("Constrain tangent or collinear");
+    sToolTipText = QT_TR_NOOP("Create a tangent or collinear constraint between two entities");
     sWhatsThis = "Sketcher_ConstrainTangent";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Tangent";
@@ -7639,8 +7447,8 @@ CmdSketcherConstrainRadius::CmdSketcherConstrainRadius()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Radius Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the radius of the selected circle or arc");
+    sMenuText = QT_TR_NOOP("Constrain radius");
+    sToolTipText = QT_TR_NOOP("Fix the radius of a circle or an arc");
     sWhatsThis = "Sketcher_ConstrainRadius";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Radius";
@@ -8002,8 +7810,8 @@ CmdSketcherConstrainDiameter::CmdSketcherConstrainDiameter()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Diameter Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the diameter of the selected circle or arc");
+    sMenuText = QT_TR_NOOP("Constrain diameter");
+    sToolTipText = QT_TR_NOOP("Fix the diameter of a circle or an arc");
     sWhatsThis = "Sketcher_ConstrainDiameter";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Diameter";
@@ -8320,8 +8128,9 @@ CmdSketcherConstrainRadiam::CmdSketcherConstrainRadiam()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Radius/Diameter Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the radius of the selected arc or the diameter of the selected circle");
+    sMenuText = QT_TR_NOOP("Constrain auto radius/diameter");
+    sToolTipText = QT_TR_NOOP(
+        "Fix the diameter if a circle is chosen, or the radius if an arc/spline pole is chosen");
     sWhatsThis = "Sketcher_ConstrainRadiam";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Radiam";
@@ -8688,8 +8497,8 @@ CmdSketcherCompConstrainRadDia::CmdSketcherCompConstrainRadDia()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Radius/Diameter Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the radius or diameter of an arc or a circle");
+    sMenuText = QT_TR_NOOP("Constrain arc or circle");
+    sToolTipText = QT_TR_NOOP("Constrain an arc or a circle");
     sWhatsThis = "Sketcher_CompConstrainRadDia";
     sStatusTip = sToolTipText;
     sAccel = "R";
@@ -8848,8 +8657,8 @@ CmdSketcherConstrainAngle::CmdSketcherConstrainAngle()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Angle Dimension");
-    sToolTipText = QT_TR_NOOP("Constrains the angle of the selected elements");
+    sMenuText = QT_TR_NOOP("Constrain angle");
+    sToolTipText = QT_TR_NOOP("Fix the angle of a line or the angle between two lines");
     sWhatsThis = "Sketcher_ConstrainAngle";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_InternalAngle";
@@ -9301,9 +9110,9 @@ CmdSketcherConstrainEqual::CmdSketcherConstrainEqual()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Equal Constraint");
+    sMenuText = QT_TR_NOOP("Constrain equal");
     sToolTipText =
-        QT_TR_NOOP("Constrains the selected edges or circles to be equal");
+        QT_TR_NOOP("Create an equality constraint between two lines or between circles and arcs");
     sWhatsThis = "Sketcher_ConstrainEqual";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_EqualLength";
@@ -9543,8 +9352,10 @@ CmdSketcherConstrainSymmetric::CmdSketcherConstrainSymmetric()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Symmetric Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements to be symmetric");
+    sMenuText = QT_TR_NOOP("Constrain symmetric");
+    sToolTipText = QT_TR_NOOP("Create a symmetry constraint "
+                              "between two points\n"
+                              "with respect to a line or a third point");
     sWhatsThis = "Sketcher_ConstrainSymmetric";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_Symmetric";
@@ -9553,13 +9364,19 @@ CmdSketcherConstrainSymmetric::CmdSketcherConstrainSymmetric()
 
     allowedSelSequences = {{SelEdge, SelVertexOrRoot},
                            {SelExternalEdge, SelVertex},
-                           {SelVertexOrRoot, SelEdge, SelVertexOrRoot},
-                           {SelVertexOrRoot, SelExternalEdge, SelVertexOrRoot},
+                           {SelVertex, SelEdge, SelVertexOrRoot},
+                           {SelRoot, SelEdge, SelVertex},
+                           {SelVertex, SelExternalEdge, SelVertexOrRoot},
+                           {SelRoot, SelExternalEdge, SelVertex},
                            {SelVertex, SelEdgeOrAxis, SelVertex},
-                           {SelVertexOrRoot, SelVertexOrRoot, SelEdge},
-                           {SelVertexOrRoot, SelVertexOrRoot, SelExternalEdge},
+                           {SelVertex, SelVertexOrRoot, SelEdge},
+                           {SelRoot, SelVertex, SelEdge},
+                           {SelVertex, SelVertexOrRoot, SelExternalEdge},
+                           {SelRoot, SelVertex, SelExternalEdge},
                            {SelVertex, SelVertex, SelEdgeOrAxis},
-                           {SelVertexOrRoot, SelVertexOrRoot, SelVertexOrRoot}};
+                           {SelVertex, SelVertexOrRoot, SelVertex},
+                           {SelVertex, SelVertex, SelVertexOrRoot},
+                           {SelVertexOrRoot, SelVertex, SelVertex}};
 }
 
 void CmdSketcherConstrainSymmetric::activated(int iMsg)
@@ -9773,12 +9590,16 @@ void CmdSketcherConstrainSymmetric::applyConstraint(std::vector<SelIdPair>& selS
             }
             break;
         }
-        case 2:// {SelVertexOrRoot, SelEdge, SelVertexOrRoot}
-        case 3:// {SelVertexOrRoot, SelExternalEdge, SelVertexOrRoot}
-        case 4:// {SelVertex, SelEdgeOrAxis, SelVertex}
-        case 5:// {SelVertexOrRoot, SelVertexOrRoot, SelEdge}
-        case 6:// {SelVertexOrRoot, SelVertexOrRoot, SelExternalEdge}
-        case 7:// {SelVertex, SelVertex, SelEdgeOrAxis}
+        case 2: // {SelVertex, SelEdge, SelVertexOrRoot}
+        case 3: // {SelRoot, SelEdge, SelVertex}
+        case 4: // {SelVertex, SelExternalEdge, SelVertexOrRoot}
+        case 5: // {SelRoot, SelExternalEdge, SelVertex}
+        case 6: // {SelVertex, SelEdgeOrAxis, SelVertex}
+        case 7: // {SelVertex, SelVertexOrRoot,SelEdge}
+        case 8: // {SelRoot, SelVertex, SelEdge}
+        case 9: // {SelVertex, SelVertexOrRoot, SelExternalEdge}
+        case 10:// {SelRoot, SelVertex, SelExternalEdge}
+        case 11:// {SelVertex, SelVertex, SelEdgeOrAxis}
         {
             GeoId1 = selSeq.at(0).GeoId;
             GeoId2 = selSeq.at(2).GeoId;
@@ -9837,7 +9658,9 @@ void CmdSketcherConstrainSymmetric::applyConstraint(std::vector<SelIdPair>& selS
             }
             return;
         }
-        case 8:// {SelVertexOrRoot, SelVertexOrRoot, SelVertexOrRoot}
+        case 12:// {SelVertex, SelVertexOrRoot, SelVertex}
+        case 13:// {SelVertex, SelVertex, SelVertexOrRoot}
+        case 14:// {SelVertexOrRoot, SelVertex, SelVertex}
         {
             GeoId1 = selSeq.at(0).GeoId;
             GeoId2 = selSeq.at(1).GeoId;
@@ -9886,8 +9709,10 @@ CmdSketcherConstrainSnellsLaw::CmdSketcherConstrainSnellsLaw()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Refraction Constraint");
-    sToolTipText = QT_TR_NOOP("Constrains the selected elements based on the refraction law (Snell's Law)");
+    sMenuText = QT_TR_NOOP("Constrain refraction (Snell's law)");
+    sToolTipText = QT_TR_NOOP("Create a refraction law (Snell's law)"
+                              "constraint between two endpoints of rays\n"
+                              "and an edge as an interface.");
     sWhatsThis = "Sketcher_ConstrainSnellsLaw";
     sStatusTip = sToolTipText;
     sPixmap = "Constraint_SnellsLaw";
@@ -9995,7 +9820,7 @@ void CmdSketcherConstrainSnellsLaw::activated(int iMsg)
     QDialog dlg(Gui::getMainWindow());
     Ui::InsertDatum ui_Datum;
     ui_Datum.setupUi(&dlg);
-    dlg.setWindowTitle(EditDatumDialog::tr("Refractive Index Ratio"));
+    dlg.setWindowTitle(EditDatumDialog::tr("Refractive index ratio"));
     ui_Datum.label->setText(EditDatumDialog::tr("Ratio n2/n1:"));
     Base::Quantity init_val;
     init_val.setUnit(Base::Unit());
@@ -10083,8 +9908,8 @@ CmdSketcherChangeDimensionConstraint::CmdSketcherChangeDimensionConstraint()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Edit Value");
-    sToolTipText = QT_TR_NOOP("Edits the value of a dimensional constraint");
+    sMenuText = QT_TR_NOOP("Change value");
+    sToolTipText = QT_TR_NOOP("Change the value of a dimensional constraint");
     sWhatsThis = "Sketcher_ChangeDimensionConstraint";
     sStatusTip = sToolTipText;
     eType = ForEdit;
@@ -10137,8 +9962,10 @@ CmdSketcherToggleDrivingConstraint::CmdSketcherToggleDrivingConstraint()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Toggle Driving/Reference Constraints");
-    sToolTipText = QT_TR_NOOP("Toggles between driving and reference mode of the selected constraints and commands");
+    sMenuText = QT_TR_NOOP("Toggle driving/reference constraint");
+    sToolTipText = QT_TR_NOOP("Set the toolbar, "
+                              "or the selected constraints,\n"
+                              "into driving or reference mode");
     sWhatsThis = "Sketcher_ToggleDrivingConstraint";
     sStatusTip = sToolTipText;
     sPixmap = "Sketcher_ToggleConstraint";
@@ -10292,8 +10119,9 @@ CmdSketcherToggleActiveConstraint::CmdSketcherToggleActiveConstraint()
 {
     sAppModule = "Sketcher";
     sGroup = "Sketcher";
-    sMenuText = QT_TR_NOOP("Toggle Constraints");
-    sToolTipText = QT_TR_NOOP("Toggles the state of the selected constraints");
+    sMenuText = QT_TR_NOOP("Activate/deactivate constraint");
+    sToolTipText = QT_TR_NOOP("Activates or deactivates "
+                              "the selected constraints");
     sWhatsThis = "Sketcher_ToggleActiveConstraint";
     sStatusTip = sToolTipText;
     sPixmap = "Sketcher_ToggleActiveConstraint";

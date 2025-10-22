@@ -106,7 +106,6 @@ TEST_F(PartFeaturesTest, testSweep)
     auto _sweep = _doc->addObject<Sweep>();
     _sweep->Sections.setValues({_plane1});
     _sweep->Spine.setValue(_edge1);
-    _sweep->Solid.setValue((false));
     // Act
     _sweep->execute();
     TopoShape ts = _sweep->Shape.getShape();

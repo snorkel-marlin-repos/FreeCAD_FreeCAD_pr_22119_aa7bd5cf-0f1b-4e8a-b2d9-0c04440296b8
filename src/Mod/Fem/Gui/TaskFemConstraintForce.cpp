@@ -308,7 +308,7 @@ void TaskFemConstraintForce::onButtonDirection(const bool pressed)
 
     auto link = getDirection(Gui::Selection().getSelectionEx());
     if (!link.first) {
-        QMessageBox::warning(this, tr("Wrong selection"), tr("Select an edge or a face."));
+        QMessageBox::warning(this, tr("Wrong selection"), tr("Select an edge or a face, please."));
         return;
     }
 

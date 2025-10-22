@@ -67,7 +67,6 @@ class _Panel(ArchComponent.Component):
     def __init__(self,obj):
 
         ArchComponent.Component.__init__(self,obj)
-        self.Type = "Panel"
         self.setProperties(obj)
         obj.IfcType = "Plate"
 
@@ -105,6 +104,7 @@ class _Panel(ArchComponent.Component):
             obj.FaceMaker = ["None","Simple","Cheese","Bullseye"]
         if not "Normal" in pl:
             obj.addProperty("App::PropertyVector","Normal","Panel",QT_TRANSLATE_NOOP("App::Property","The normal extrusion direction of this object (keep (0,0,0) for automatic normal)"), locked=True)
+        self.Type = "Panel"
         obj.setEditorMode("VerticalArea",2)
         obj.setEditorMode("HorizontalArea",2)
 
@@ -112,10 +112,6 @@ class _Panel(ArchComponent.Component):
 
         ArchComponent.Component.onDocumentRestored(self,obj)
         self.setProperties(obj)
-
-    def loads(self,state):
-
-        self.Type = "Panel"
 
     def execute(self,obj):
 

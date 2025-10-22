@@ -79,16 +79,12 @@ class TestObjectCreate(unittest.TestCase):
         # gmsh mesh children: group, region, boundary layer --> 3
         # result children: mesh result --> 1
         # analysis itself is not in analysis group --> 1
-        # vtk post pipeline children: region, scalar, cut, wrap, contour --> 5
-        # vtk python post objects: glyph, 6x data extraction --> 7
+        # vtk post pipeline children: region, scalar, cut, wrap, glyph --> 5
+        # vtk python post objects: glyph --> 1
 
         subtraction = 15
         if vtk_objects_used:
-            subtraction += 12
-            if not ("BUILD_FEM_VTK_PYTHON" in FreeCAD.__cmake__):
-                # remove the 3 data visualization objects that would be in the Analysis
-                # if they would be available (Lineplot, histogram, table)
-                subtraction += 3
+            subtraction += 6
 
         self.assertEqual(len(doc.Analysis.Group), count_defmake - subtraction)
 
@@ -96,9 +92,7 @@ class TestObjectCreate(unittest.TestCase):
         # have been counted, but will not be executed to create objects
         failed = 0
         if vtk_objects_used and not ("BUILD_FEM_VTK_PYTHON" in FreeCAD.__cmake__):
-            # the 7 objects also counted in subtraction, +3 additional objects that are
-            # added directly to the analysis
-            failed += 10
+            failed += 1
 
         self.assertEqual(len(doc.Objects), count_defmake - failed)
 
@@ -1172,19 +1166,6 @@ def create_all_fem_objects_doc(doc):
         ObjectsFem.makePostVtkFilterContours(doc, vres)
         if "BUILD_FEM_VTK_PYTHON" in FreeCAD.__cmake__:
             ObjectsFem.makePostFilterGlyph(doc, vres)
-
-            # data extraction objects
-            lp = analysis.addObject(ObjectsFem.makePostLineplot(doc))[0]
-            lp.addObject(ObjectsFem.makePostLineplotFieldData(doc))
-            lp.addObject(ObjectsFem.makePostLineplotIndexOverFrames(doc))
-
-            hp = analysis.addObject(ObjectsFem.makePostHistogram(doc))[0]
-            hp.addObject(ObjectsFem.makePostHistogramFieldData(doc))
-            hp.addObject(ObjectsFem.makePostHistogramIndexOverFrames(doc))
-
-            tb = analysis.addObject(ObjectsFem.makePostTable(doc))[0]
-            tb.addObject(ObjectsFem.makePostTableFieldData(doc))
-            tb.addObject(ObjectsFem.makePostTableIndexOverFrames(doc))
 
     analysis.addObject(ObjectsFem.makeSolverCalculiXCcxTools(doc))
     analysis.addObject(ObjectsFem.makeSolverCalculiX(doc))

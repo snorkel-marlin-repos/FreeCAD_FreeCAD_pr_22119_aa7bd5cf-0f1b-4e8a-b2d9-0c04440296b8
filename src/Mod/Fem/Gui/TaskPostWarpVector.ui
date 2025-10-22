@@ -95,7 +95,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Minimum warp</string>
+        <string>Min warp</string>
        </property>
       </widget>
      </item>
@@ -115,7 +115,7 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string>Maximum warp</string>
+        <string>Max warp</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

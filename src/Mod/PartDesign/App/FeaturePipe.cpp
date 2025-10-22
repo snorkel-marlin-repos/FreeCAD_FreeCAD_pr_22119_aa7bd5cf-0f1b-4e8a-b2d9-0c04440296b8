@@ -400,7 +400,8 @@ App::DocumentObjectExecReturn *Pipe::execute()
             if (boolOp.isNull())
                 return new App::DocumentObjectExecReturn(QT_TRANSLATE_NOOP("Exception", "Resulting shape is not a solid"));
 
-            if (!isSingleSolidRuleSatisfied(boolOp.getShape())) {
+            int solidCount = countSolids(boolOp.getShape());
+            if (solidCount > 1) {
                 return new App::DocumentObjectExecReturn(QT_TRANSLATE_NOOP("Exception",
                                                                            "Result has multiple solids: that is not currently supported."));
             }
@@ -421,7 +422,8 @@ App::DocumentObjectExecReturn *Pipe::execute()
             if (boolOp.isNull())
                 return new App::DocumentObjectExecReturn(QT_TRANSLATE_NOOP("Exception", "Resulting shape is not a solid"));
 
-            if (!isSingleSolidRuleSatisfied(boolOp.getShape())) {
+            int solidCount = countSolids(boolOp.getShape());
+            if (solidCount > 1) {
                 return new App::DocumentObjectExecReturn(QT_TRANSLATE_NOOP("Exception",
                                                                            "Result has multiple solids: that is not currently supported."));
             }

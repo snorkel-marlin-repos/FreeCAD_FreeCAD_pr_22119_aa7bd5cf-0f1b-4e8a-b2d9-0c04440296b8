@@ -33,12 +33,8 @@ else:
 class AdvancedPreferencesPage:
     def __init__(self, parent=None):
         self.form = FreeCADGui.PySideUic.loadUi(":preferences/Advanced.ui")
-        if hasattr(self.form.WarningSuppressAllSpeeds, "checkStateChanged"):  # Qt version >= 6.7.0
-            self.form.WarningSuppressAllSpeeds.checkStateChanged.connect(self.updateSelection)
-            self.form.EnableAdvancedOCLFeatures.checkStateChanged.connect(self.updateSelection)
-        else:  # Qt version < 6.7.0
-            self.form.WarningSuppressAllSpeeds.stateChanged.connect(self.updateSelection)
-            self.form.EnableAdvancedOCLFeatures.stateChanged.connect(self.updateSelection)
+        self.form.WarningSuppressAllSpeeds.stateChanged.connect(self.updateSelection)
+        self.form.EnableAdvancedOCLFeatures.stateChanged.connect(self.updateSelection)
 
     def saveSettings(self):
         Path.Preferences.setPreferencesAdvanced(

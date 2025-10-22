@@ -85,7 +85,6 @@ public:
     SoSFVec3f  norm;
     SoSFImage  image;
     SoSFFloat  lineWidth;
-    SoSFFloat  sampling;
     bool       useAntialiasing;
 
 protected:

@@ -104,6 +104,7 @@ App::DocumentObjectExecReturn *Fillet::execute()
 
         TopTools_ListOfShape aLarg;
         aLarg.Append(baseShape.getShape());
+        bool failed = false;
         if (!BRepAlgo::IsValid(aLarg, shape.getShape(), Standard_False, Standard_False)) {
             ShapeFix_ShapeTolerance aSFT;
             aSFT.LimitTolerance(shape.getShape(),
@@ -112,15 +113,20 @@ App::DocumentObjectExecReturn *Fillet::execute()
                                 TopAbs_SHAPE);
         }
 
-        // store shape before refinement
-        this->rawShape = shape;
-        shape = refineShapeIfActive(shape);
+        if (!failed) {
+            // store shape before refinement
+            this->rawShape = shape;
+            shape = refineShapeIfActive(shape);
+            shape = getSolid(shape);
+        }
         if (!isSingleSolidRuleSatisfied(shape.getShape())) {
             return new App::DocumentObjectExecReturn(QT_TRANSLATE_NOOP("Exception", "Result has multiple solids: that is not currently supported."));
         }
-
-        shape = getSolid(shape);
         this->Shape.setValue(shape);
+
+        if (failed) {
+            return new App::DocumentObjectExecReturn("Resulting shape is invalid");
+        }
         return App::DocumentObject::StdReturn;
     }
     catch (Standard_Failure& e) {

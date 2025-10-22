@@ -45,7 +45,6 @@ public:
     }
 Q_SIGNALS:
     void resizeFinished();
-    void cursorChanged(QCursor);
 
 protected:
     void mouseMoveEvent(QMouseEvent* e) override;

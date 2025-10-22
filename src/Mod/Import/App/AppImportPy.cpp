@@ -48,7 +48,6 @@
 #endif
 #endif
 
-#include <chrono>
 #include "dxf/ImpExpDxf.h"
 #include "SketchExportHelper.h"
 #include <App/Application.h>
@@ -414,15 +413,8 @@ private:
             ImpExpDxfRead dxf_file(EncodedName, pcDoc);
             dxf_file.setOptionSource(defaultOptions);
             dxf_file.setOptions();
-
-            auto startTime = std::chrono::high_resolution_clock::now();
             dxf_file.DoRead(IgnoreErrors);
-            auto endTime = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = endTime - startTime;
-            dxf_file.setImportTime(elapsed.count());
-
             pcDoc->recompute();
-            return dxf_file.getStatsAsPyObject();
         }
         catch (const Standard_Failure& e) {
             throw Py::RuntimeError(e.GetMessageString());
@@ -430,6 +422,7 @@ private:
         catch (const Base::Exception& e) {
             throw Py::RuntimeError(e.what());
         }
+        return Py::None();
     }
 
 

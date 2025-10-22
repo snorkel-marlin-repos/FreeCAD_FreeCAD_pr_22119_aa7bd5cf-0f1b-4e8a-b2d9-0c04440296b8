@@ -163,9 +163,6 @@ public:
 
     static bool showUnits();
 
-    static bool snapDetailHighlights();
-    static double detailSnapRadius();
-
 };
 
 

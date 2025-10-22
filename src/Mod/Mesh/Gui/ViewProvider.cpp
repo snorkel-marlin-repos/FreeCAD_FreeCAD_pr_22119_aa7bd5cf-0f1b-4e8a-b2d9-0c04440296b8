@@ -792,7 +792,7 @@ void ViewProviderMesh::setupContextMenu(QMenu* menu, QObject* receiver, const ch
 
     // toggle command to display components
     auto func = new Gui::ActionFunction(menu);
-    QAction* act = menu->addAction(QObject::tr("Display Components"));
+    QAction* act = menu->addAction(QObject::tr("Display components"));
     act->setCheckable(true);
     act->setChecked(pcMatBinding->value.getValue() == SoMaterialBinding::PER_FACE
                     && highlightMode == HighlighMode::Component);
@@ -800,7 +800,7 @@ void ViewProviderMesh::setupContextMenu(QMenu* menu, QObject* receiver, const ch
         this->setHighlightedComponents(on);
     });
 
-    QAction* seg = menu->addAction(QObject::tr("Display Segments"));
+    QAction* seg = menu->addAction(QObject::tr("Display segments"));
     seg->setCheckable(true);
     seg->setChecked(pcMatBinding->value.getValue() == SoMaterialBinding::PER_FACE
                     && highlightMode == HighlighMode::Segment);
@@ -808,7 +808,7 @@ void ViewProviderMesh::setupContextMenu(QMenu* menu, QObject* receiver, const ch
         this->setHighlightedSegments(on);
     });
 
-    QAction* col = menu->addAction(QObject::tr("Display Colors"));
+    QAction* col = menu->addAction(QObject::tr("Display colors"));
     col->setVisible(canHighlightColors());
     col->setCheckable(true);
     col->setChecked(highlightMode == HighlighMode::Color);
@@ -1678,7 +1678,7 @@ void ViewProviderMesh::faceInfoCallback(void* ud, SoEventCallback* cb)
         cb->setHandled();
         // context-menu
         QMenu menu;
-        QAction* cl = menu.addAction(QObject::tr("Leave Info Mode"));
+        QAction* cl = menu.addAction(QObject::tr("Leave info mode"));
         QAction* id = menu.exec(QCursor::pos());
         if (cl == id) {
             view->setEditing(false);
@@ -1771,7 +1771,7 @@ void ViewProviderMesh::fillHoleCallback(void* ud, SoEventCallback* cb)
         cb->setHandled();
         // context-menu
         QMenu menu;
-        QAction* cl = menu.addAction(QObject::tr("Leave Hole-Filling Mode"));
+        QAction* cl = menu.addAction(QObject::tr("Leave hole-filling mode"));
         QAction* id = menu.exec(QCursor::pos());
         if (cl == id) {
             view->setEditing(false);
@@ -1819,9 +1819,9 @@ void ViewProviderMesh::markPartCallback(void* ud, SoEventCallback* cb)
             cb->setHandled();
             // context-menu
             QMenu menu;
-            QAction* cl = menu.addAction(QObject::tr("Leave Removal Mode"));
-            QAction* rm = menu.addAction(QObject::tr("Delete Selected Faces"));
-            QAction* cf = menu.addAction(QObject::tr("Clear Selected Faces"));
+            QAction* cl = menu.addAction(QObject::tr("Leave removal mode"));
+            QAction* rm = menu.addAction(QObject::tr("Delete selected faces"));
+            QAction* cf = menu.addAction(QObject::tr("Clear selected faces"));
             QAction* id = menu.exec(QCursor::pos());
             if (cl == id) {
                 view->setEditing(false);

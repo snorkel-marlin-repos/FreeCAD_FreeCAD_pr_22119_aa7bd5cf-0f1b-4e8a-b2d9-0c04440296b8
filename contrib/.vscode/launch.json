@@ -100,7 +100,7 @@
     },
     {
       "name": "Python debugger",
-      "type": "debugpy",
+      "type": "python",
       "request": "attach",
       "preLaunchTask": "WaitForDebugpy",
       "redirectOutput": true,

@@ -100,6 +100,7 @@ public:
     static const uint32_t defaultColor = 0x3296faff;
 
 protected:
+    void updateData(const App::Property*) override;
     bool onDelete(const std::vector<std::string> &) override;
 
 private:

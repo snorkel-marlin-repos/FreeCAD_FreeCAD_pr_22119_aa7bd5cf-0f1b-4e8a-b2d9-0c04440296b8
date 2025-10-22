@@ -176,21 +176,6 @@ struct LWPolyDataOut
     point3D Extr;
 };
 
-// Statistics reporting structure
-struct DxfImportStats
-{
-    double importTimeSeconds = 0.0;
-    std::string dxfVersion;
-    std::string dxfEncoding;
-    std::string scalingSource;
-    std::string fileUnits;
-    double finalScalingFactor = 1.0;
-    std::map<std::string, int> entityCounts;
-    std::map<std::string, std::string> importSettings;
-    std::map<std::string, std::vector<std::pair<int, std::string>>> unsupportedFeatures;
-    int totalEntitiesCreated = 0;
-};
-
 
 // "using" for enums is not supported by all platforms
 // https://stackoverflow.com/questions/41167119/how-to-fix-a-wsubobject-linkage-warning
@@ -200,7 +185,6 @@ enum eDXFGroupCode_t
     ePrimaryText = 1,
     eName = 2,
     eExtraText = 3,
-    eHandle = 5,
     eLinetypeName = 6,
     eTextStyleName = 7,
     eLayerName = 8,
@@ -463,9 +447,6 @@ private:
     bool m_not_eof = true;
     int m_line = 0;
     bool m_repeat_last_record = false;
-    int m_current_entity_line_number = 0;
-    std::string m_current_entity_name;
-    std::string m_current_entity_handle;
 
     // The scaling from DXF units to millimetres.
     // This does not include the dxfScaling option
@@ -474,7 +455,6 @@ private:
     double m_unitScalingFactor = 0.0;
 
 protected:
-    DxfImportStats m_stats;
     // An additional scaling factor which can be modified before readDXF is called, and will be
     // incorporated into m_unitScalingFactor.
     void SetAdditionalScaling(double scaling)
@@ -720,6 +700,7 @@ protected:
     void UnsupportedFeature(const char* format, args&&... argValues);
 
 private:
+    std::map<std::string, std::pair<int, int>> m_unsupportedFeaturesNoted;
     std::string m_CodePage;  // Code Page name from $DWGCODEPAGE or null if none/not read yet
     // The following was going to be python's canonical name for the encoding, but this is (a) not
     // easily found and (b) does not speed up finding the encoding object.
@@ -864,10 +845,6 @@ public:
     bool Failed() const
     {
         return m_fail;
-    }
-    void setImportTime(double seconds)
-    {
-        m_stats.importTimeSeconds = seconds;
     }
     void
     DoRead(bool ignore_errors = false);  // this reads the file and calls the following functions

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Mesh Boundary Layer Settings</string>
+   <string>Mesh boundary layer settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -31,7 +31,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="l_layers">
           <property name="text">
-           <string>Maximum layers</string>
+           <string>Max Layers</string>
           </property>
          </widget>
         </item>
@@ -48,7 +48,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="l_thickness">
           <property name="text">
-           <string>Minimum/1st thickness</string>
+           <string>Min/1st thickness</string>
           </property>
          </widget>
         </item>

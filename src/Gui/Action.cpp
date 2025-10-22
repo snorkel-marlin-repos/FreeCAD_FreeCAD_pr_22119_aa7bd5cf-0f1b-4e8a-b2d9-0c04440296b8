@@ -606,37 +606,9 @@ void ActionGroup::onActivated (QAction* act)
     }
 }
 
-/**
- * Shows tooltip at the right side when hovered.
- */
-void ActionGroup::onHovered(QAction *act)
+void ActionGroup::onHovered (QAction *act)
 {
-    const auto topLevelWidgets = QApplication::topLevelWidgets();
-    QMenu* foundMenu = nullptr;
-
-    for (QWidget* widget : topLevelWidgets) {
-        QList<QMenu*> menus = widget->findChildren<QMenu*>();
-
-        for (QMenu* menu : menus) {
-            if (menu->isVisible() && menu->actions().contains(act)) {
-                foundMenu = menu;
-                break;
-            }
-        }
-
-        if (foundMenu) {
-            break;
-        }
-
-    }
-
-    if (foundMenu) {
-        QRect actionRect = foundMenu->actionGeometry(act);
-        QPoint globalPos = foundMenu->mapToGlobal(actionRect.topRight());
-        QToolTip::showText(globalPos, act->toolTip(), foundMenu, actionRect);
-    } else {
-        QToolTip::showText(QCursor::pos(), act->toolTip());
-    }
+    QToolTip::showText(QCursor::pos(), act->toolTip());
 }
 
 

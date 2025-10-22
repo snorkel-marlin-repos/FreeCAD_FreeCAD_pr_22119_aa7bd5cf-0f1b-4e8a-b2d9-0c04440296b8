@@ -106,13 +106,13 @@ public:
     /// Comparison
     inline bool operator==(const Matrix4D& mat) const;
     /// Index operator
-    inline std::array<double, 4>& operator[](unsigned int usNdx);
+    inline double* operator[](unsigned short usNdx);
     /// Index operator
-    inline const std::array<double, 4>& operator[](unsigned int usNdx) const;
+    inline const double* operator[](unsigned short usNdx) const;
     /// Get vector of row
-    inline Vector3d getRow(unsigned int usNdx) const;
+    inline Vector3d getRow(unsigned short usNdx) const;
     /// Get vector of column
-    inline Vector3d getCol(unsigned int usNdx) const;
+    inline Vector3d getCol(unsigned short usNdx) const;
     /// Get vector of diagonal
     inline Vector3d diagonal() const;
     /// Get trace of the 3x3 matrix
@@ -120,9 +120,9 @@ public:
     /// Get trace of the 4x4 matrix
     inline double trace() const;
     /// Set row to vector
-    inline void setRow(unsigned int usNdx, const Vector3d& vec);
+    inline void setRow(unsigned short usNdx, const Vector3d& vec);
     /// Set column to vector
-    inline void setCol(unsigned int usNdx, const Vector3d& vec);
+    inline void setCol(unsigned short usNdx, const Vector3d& vec);
     /// Set diagonal to vector
     inline void setDiagonal(const Vector3d& vec);
     /// Compute the determinant of the matrix
@@ -234,21 +234,27 @@ public:
     void fromString(const std::string& str);
 
 private:
-    using Array2d = std::array<std::array<double, 4>, 4>;
-    Array2d dMtrx4D;
+    double dMtrx4D[4][4];
 };
 
 inline Matrix4D Matrix4D::operator+(const Matrix4D& mat) const
 {
-    Matrix4D newMat(*this);
-    return newMat += mat;
+    Matrix4D clMat;
+
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            clMat.dMtrx4D[iz][is] = dMtrx4D[iz][is] + mat[iz][is];
+        }
+    }
+
+    return clMat;
 }
 
 inline Matrix4D& Matrix4D::operator+=(const Matrix4D& mat)
 {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            dMtrx4D[i][j] += mat[i][j];
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            dMtrx4D[iz][is] += mat[iz][is];
         }
     }
 
@@ -257,15 +263,22 @@ inline Matrix4D& Matrix4D::operator+=(const Matrix4D& mat)
 
 inline Matrix4D Matrix4D::operator-(const Matrix4D& mat) const
 {
-    Matrix4D newMat(*this);
-    return newMat -= mat;
+    Matrix4D clMat;
+
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            clMat.dMtrx4D[iz][is] = dMtrx4D[iz][is] - mat[iz][is];
+        }
+    }
+
+    return clMat;
 }
 
 inline Matrix4D& Matrix4D::operator-=(const Matrix4D& mat)
 {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            dMtrx4D[i][j] -= mat[i][j];
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            dMtrx4D[iz][is] -= mat[iz][is];
         }
     }
 
@@ -274,7 +287,19 @@ inline Matrix4D& Matrix4D::operator-=(const Matrix4D& mat)
 
 inline Matrix4D& Matrix4D::operator*=(const Matrix4D& mat)
 {
-    (*this) = (*this) * mat;
+    Matrix4D clMat;
+
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            clMat.dMtrx4D[iz][is] = 0;
+            for (int ie = 0; ie < 4; ie++) {
+                clMat.dMtrx4D[iz][is] += dMtrx4D[iz][ie] * mat.dMtrx4D[ie][is];
+            }
+        }
+    }
+
+    (*this) = clMat;
+
     return *this;
 }
 
@@ -282,11 +307,11 @@ inline Matrix4D Matrix4D::operator*(const Matrix4D& mat) const
 {
     Matrix4D clMat;
 
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            clMat.dMtrx4D[i][j] = 0;
-            for (int e = 0; e < 4; e++) {
-                clMat.dMtrx4D[i][j] += dMtrx4D[i][e] * mat.dMtrx4D[e][j];
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            clMat.dMtrx4D[iz][is] = 0;
+            for (int ie = 0; ie < 4; ie++) {
+                clMat.dMtrx4D[iz][is] += dMtrx4D[iz][ie] * mat.dMtrx4D[ie][is];
             }
         }
     }
@@ -300,9 +325,9 @@ inline Matrix4D& Matrix4D::operator=(const Matrix4D& mat)
         return *this;
     }
 
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            dMtrx4D[i][j] = mat.dMtrx4D[i][j];
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            dMtrx4D[iz][is] = mat.dMtrx4D[iz][is];
         }
     }
 
@@ -311,16 +336,23 @@ inline Matrix4D& Matrix4D::operator=(const Matrix4D& mat)
 
 inline Vector3f Matrix4D::operator*(const Vector3f& vec) const
 {
-    Vector3f dst;
-    multVec(vec, dst);
-    return dst;
+    // clang-format off
+    double sx = static_cast<double>(vec.x);
+    double sy = static_cast<double>(vec.y);
+    double sz = static_cast<double>(vec.z);
+    return Vector3f(static_cast<float>(dMtrx4D[0][0] * sx + dMtrx4D[0][1] * sy + dMtrx4D[0][2] * sz + dMtrx4D[0][3]),
+                    static_cast<float>(dMtrx4D[1][0] * sx + dMtrx4D[1][1] * sy + dMtrx4D[1][2] * sz + dMtrx4D[1][3]),
+                    static_cast<float>(dMtrx4D[2][0] * sx + dMtrx4D[2][1] * sy + dMtrx4D[2][2] * sz + dMtrx4D[2][3]));
+    // clang-format on
 }
 
 inline Vector3d Matrix4D::operator*(const Vector3d& vec) const
 {
-    Vector3d dst;
-    multVec(vec, dst);
-    return dst;
+    // clang-format off
+    return Vector3d((dMtrx4D[0][0] * vec.x + dMtrx4D[0][1] * vec.y + dMtrx4D[0][2] * vec.z + dMtrx4D[0][3]),
+                    (dMtrx4D[1][0] * vec.x + dMtrx4D[1][1] * vec.y + dMtrx4D[1][2] * vec.z + dMtrx4D[1][3]),
+                    (dMtrx4D[2][0] * vec.x + dMtrx4D[2][1] * vec.y + dMtrx4D[2][2] * vec.z + dMtrx4D[2][3]));
+    // clang-format on
 }
 
 inline void Matrix4D::multVec(const Vector3d& src, Vector3d& dst) const
@@ -347,15 +379,21 @@ inline void Matrix4D::multVec(const Vector3f& src, Vector3f& dst) const
 
 inline Matrix4D Matrix4D::operator*(double scalar) const
 {
-    Matrix4D newMat(*this);
-    return newMat *= scalar;
+    Matrix4D matrix;
+    for (unsigned short i = 0; i < 4; i++) {
+        for (unsigned short j = 0; j < 4; j++) {
+            matrix.dMtrx4D[i][j] = dMtrx4D[i][j] * scalar;
+        }
+    }
+
+    return matrix;
 }
 
 inline Matrix4D& Matrix4D::operator*=(double scalar)
 {
     // NOLINTBEGIN
-    for (unsigned int i = 0; i < 4; i++) {
-        for (unsigned int j = 0; j < 4; j++) {
+    for (unsigned short i = 0; i < 4; i++) {
+        for (unsigned short j = 0; j < 4; j++) {
             dMtrx4D[i][j] *= scalar;
         }
     }
@@ -365,9 +403,9 @@ inline Matrix4D& Matrix4D::operator*=(double scalar)
 
 inline bool Matrix4D::operator==(const Matrix4D& mat) const
 {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (fabs(dMtrx4D[i][j] - mat.dMtrx4D[i][j]) > traits_type::epsilon()) {
+    for (int iz = 0; iz < 4; iz++) {
+        for (int is = 0; is < 4; is++) {
+            if (fabs(dMtrx4D[iz][is] - mat.dMtrx4D[iz][is]) > traits_type::epsilon()) {
                 return false;
             }
         }
@@ -383,26 +421,26 @@ inline bool Matrix4D::operator!=(const Matrix4D& mat) const
 
 inline Vector3f& operator*=(Vector3f& vec, const Matrix4D& mat)
 {
-    mat.multVec(vec, vec);
+    vec = mat * vec;
     return vec;
 }
 
-inline std::array<double, 4>& Matrix4D::operator[](unsigned int usNdx)
+inline double* Matrix4D::operator[](unsigned short usNdx)
 {
     return dMtrx4D[usNdx];
 }
 
-inline const std::array<double, 4>& Matrix4D::operator[](unsigned int usNdx) const
+inline const double* Matrix4D::operator[](unsigned short usNdx) const
 {
     return dMtrx4D[usNdx];
 }
 
-inline Vector3d Matrix4D::getRow(unsigned int usNdx) const
+inline Vector3d Matrix4D::getRow(unsigned short usNdx) const
 {
     return Vector3d(dMtrx4D[usNdx][0], dMtrx4D[usNdx][1], dMtrx4D[usNdx][2]);
 }
 
-inline Vector3d Matrix4D::getCol(unsigned int usNdx) const
+inline Vector3d Matrix4D::getCol(unsigned short usNdx) const
 {
     return Vector3d(dMtrx4D[0][usNdx], dMtrx4D[1][usNdx], dMtrx4D[2][usNdx]);
 }
@@ -422,14 +460,14 @@ inline double Matrix4D::trace() const
     return dMtrx4D[0][0] + dMtrx4D[1][1] + dMtrx4D[2][2] + dMtrx4D[3][3];
 }
 
-inline void Matrix4D::setRow(unsigned int usNdx, const Vector3d& vec)
+inline void Matrix4D::setRow(unsigned short usNdx, const Vector3d& vec)
 {
     dMtrx4D[usNdx][0] = vec.x;
     dMtrx4D[usNdx][1] = vec.y;
     dMtrx4D[usNdx][2] = vec.z;
 }
 
-inline void Matrix4D::setCol(unsigned int usNdx, const Vector3d& vec)
+inline void Matrix4D::setCol(unsigned short usNdx, const Vector3d& vec)
 {
     dMtrx4D[0][usNdx] = vec.x;
     dMtrx4D[1][usNdx] = vec.y;
